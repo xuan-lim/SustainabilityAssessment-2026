@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import datetime
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -18,7 +17,7 @@ st.markdown("""
         font-size: 16px;
         border-radius: 8px;
         display: block;
-        margin: 0 auto; /* 嘗試透過 CSS 置中 */
+        margin: 0 auto;
     }
     div.stButton > button:hover {
         background-color: #FF7000 !important; /* Darker Orange on hover */
@@ -27,6 +26,10 @@ st.markdown("""
     /* 調整 Expander 標題字體 */
     .streamlit-expanderHeader {
         font-weight: bold;
+        font-size: 16px;
+    }
+    /* 調整 Radio Button 的字體大小 */
+    .stRadio label {
         font-size: 16px;
     }
     </style>
@@ -42,42 +45,63 @@ class SustainabilityAssessment:
         if 'step' not in st.session_state:
             st.session_state.step = 0 
         if 'language' not in st.session_state:
-            st.session_state.language = 'zh' # 預設，稍後選擇
+            st.session_state.language = 'zh' # 預設
         if 'user_info' not in st.session_state:
             st.session_state.user_info = {}
+        # 暫存區
+        if 'temp_stakeholder_data' not in st.session_state:
+            st.session_state.temp_stakeholder_data = {}
+        if 'selected_materiality_topics' not in st.session_state:
+            st.session_state.selected_materiality_topics = []
+            
+        # 結果區
         if 'data_stakeholder' not in st.session_state:
             st.session_state.data_stakeholder = None
         if 'data_materiality' not in st.session_state:
             st.session_state.data_materiality = None
-        if 'selected_materiality_topics' not in st.session_state:
-            st.session_state.selected_materiality_topics = []
         if 'data_tcfd' not in st.session_state:
             st.session_state.data_tcfd = {}
         if 'data_hrdd' not in st.session_state:
             st.session_state.data_hrdd = {}
 
     def setup_data(self):
-        # 這裡定義所有的翻譯和固定選項資料
-        self.texts = {
+        # ---------------------------------------------------------
+        # 1. 介面文字 (UI Labels)
+        # ---------------------------------------------------------
+        self.ui_texts = {
             "zh": {
                 "step0_title": "語言選擇 / Language Selection",
-                "step1_title": "基本資料 / Basic Information",
+                "step1_title": "基本資料",
                 "step2_title": "1. 利害關係人評估 (Stakeholder Assessment)",
                 "step3_title": "2. 重大性議題評估 (Materiality Assessment)",
                 "step4_title": "3. 氣候變遷風險評估 (TCFD)",
                 "step5_title": "4. 人權盡職調查 (HRDD)",
-                "name": "姓名",
-                "dept": "部門",
-                "next": "下一步 (Next Step)",
-                "submit": "提交並下載結果",
-                "error_fill_all": "請填寫所有欄位",
+                "name_label": "姓名",
+                "dept_label": "部門",
+                "next_btn": "下一步",
+                "finish_btn": "完成評估並下載",
+                "error_fill": "請填寫所有欄位",
                 "error_select_10": "請正好選擇 10 個議題",
                 "download_btn": "下載 Excel 結果報告",
-                "risk_section": "風險評估 (Risk Assessment)",
-                "opp_section": "機會評估 (Opportunity Assessment)",
-                "hrdd_sev_label": "嚴重度 (Severity)",
-                "hrdd_prob_label": "可能性 (Probability)",
-                "hrdd_vc_label": "價值鏈關聯 (Value Chain)"
+                "start_over": "重新開始",
+                "score_def": "評分定義：0 (無關) - 5 (高度相關)",
+                "enter_note": "按下 'Enter' 僅會更新數值，請點擊下方按鈕繼續。",
+                "mat_select_instr": "步驟 2.1: 請勾選 10 個議題",
+                "mat_eval_instr": "步驟 2.2: 評估已選議題",
+                "confirm_sel": "確認選擇",
+                "status_label": "狀態",
+                "val_label": "價值創造 (機會) [1-5]",
+                "prob_label": "可能性 (機率) [1-5]",
+                "status_opts": ["已發生 (Actual)", "潛在 (Potential)"],
+                "risk_header": "🛑 風險評估 (Risk)",
+                "opp_header": "🌟 機會評估 (Opportunity)",
+                "sev_label": "嚴重度",
+                "like_label": "可能性",
+                "hrdd_vc": "價值鏈關聯",
+                "hrdd_sup": "供應商",
+                "hrdd_cust": "客戶",
+                "hrdd_sev": "嚴重度",
+                "hrdd_prob": "可能性"
             },
             "en": {
                 "step0_title": "Language Selection",
@@ -85,95 +109,143 @@ class SustainabilityAssessment:
                 "step2_title": "1. Stakeholder Assessment",
                 "step3_title": "2. Materiality Assessment",
                 "step4_title": "3. TCFD Assessment",
-                "step5_title": "4. HRDD Assessment",
-                "name": "Name",
-                "dept": "Department",
-                "next": "Next Step",
-                "submit": "Submit & Download",
-                "error_fill_all": "Please fill in all fields",
+                "step5_title": "4. Human Rights Due Diligence (HRDD)",
+                "name_label": "Name",
+                "dept_label": "Department",
+                "next_btn": "Next Step",
+                "finish_btn": "Finish & Download",
+                "error_fill": "Please fill in all fields",
                 "error_select_10": "Please select exactly 10 topics",
                 "download_btn": "Download Result Excel",
-                "risk_section": "Risk Assessment",
-                "opp_section": "Opportunity Assessment",
-                "hrdd_sev_label": "Severity",
-                "hrdd_prob_label": "Probability",
-                "hrdd_vc_label": "Value Chain Relevance"
+                "start_over": "Start Over",
+                "score_def": "Score Definition: 0 (No relevant) - 5 (Very relevant)",
+                "enter_note": "Pressing 'Enter' only updates the score. Click the button below to proceed.",
+                "mat_select_instr": "Step 2.1: Select 10 Topics",
+                "mat_eval_instr": "Step 2.2: Evaluate Selected Topics",
+                "confirm_sel": "Confirm Selection",
+                "status_label": "Status",
+                "val_label": "Value Creation (Opp) [1-5]",
+                "prob_label": "Probability (Likelihood) [1-5]",
+                "status_opts": ["Actual (Happened)", "Potential (Not happened)"],
+                "risk_header": "🛑 Risk Assessment",
+                "opp_header": "🌟 Opportunity Assessment",
+                "sev_label": "Severity",
+                "like_label": "Likelihood",
+                "hrdd_vc": "Value Chain Relevance",
+                "hrdd_sup": "Supplier",
+                "hrdd_cust": "Customer",
+                "hrdd_sev": "Severity",
+                "hrdd_prob": "Probability"
             }
         }
 
-        # Stakeholder Data
-        self.sh_cols = ["Responsibility (責任)", "Influence (影響力)", "Tension (張力)", "Diverse Perspectives (多元觀點)", "Dependency (依賴性)"]
-        self.sh_rows = ["Supplier (供應商)", "Customer (客戶)", "Employee (員工)", "Shareholder/Investor (股東/投資人)", "Government (政府機關)", "Community/School/NPO (社區/學校/非營利組織)"]
-        
-        # Materiality Topics
-        self.mat_topics = [
-            "Sustainability Strategy (永續策略)", "Ethical Management (誠信經營)", "Corporate Governance (公司治理)", 
-            "Risk Management (風險控管)", "Compliance (法規遵循)", "Business Continuity (營運持續)", 
-            "Information Security (資訊安全)", "Supplier Management (供應商管理)", "Customer Relationship (客戶關係)", 
-            "Tax Policies (稅務政策)", "Operational Performance (營運績效)", "Innovation (創新與數位責任)", 
-            "AI & Tech Transformation (AI與科技變革)", "Climate Adaptation (氣候變遷因應)", "Resource Management (環境與能資源)", 
-            "Biodiversity (生物多樣性)", "Occupational Safety (職場健康與安全)", "Employee Development (員工培育)", 
-            "Talent Retention (人才吸引留任)", "Social Care (社會關懷)", "Human Rights (人權平等)"
-        ]
+        # ---------------------------------------------------------
+        # 2. 評估內容資料 (Content Data) - 中英分流
+        # ---------------------------------------------------------
+        self.content = {
+            "zh": {
+                # Stakeholder
+                "sh_rows": ["供應商", "客戶", "員工", "股東/投資人", "政府機關", "社區/學校/非營利組織"],
+                "sh_cols": ["責任", "影響力", "張力", "多元觀點", "依賴性"],
+                
+                # Materiality
+                "mat_topics": [
+                    "永續策略", "誠信經營", "公司治理", "風險控管", "法規遵循", "營運持續管理", 
+                    "資訊安全", "供應商管理", "客戶關係管理", "稅務政策", "營運績效", 
+                    "創新與數位責任", "人工智慧與科技變革", "氣候變遷因應", "環境與能資源管理", 
+                    "生物多樣性", "職場健康與安全", "員工培育與職涯發展", "人才吸引與留任", 
+                    "社會關懷與鄰里促進", "人權平等"
+                ],
 
-        # TCFD Topics
-        self.tcfd_risks = [
-            "溫室氣體排放定價上升 (Rising GHG pricing)",
-            "對現有商品與服務的法規強制 (Mandates on existing products/services)",
-            "現有商品與服務被低碳商品替代 (Substitution of existing products)",
-            "新技術投資成效不佳 (Unsuccessful investment in new tech)",
-            "低碳轉型的轉型成本 (Costs to transition to lower emissions)",
-            "消費者行為改變 (Changing consumer behavior)",
-            "氣候極端事件 (Extreme weather events)",
-            "平均氣溫上升 (Rising mean temperatures)"
-        ]
-        self.tcfd_opps = [
-            "使用低排放能源 (Use of lower-emission sources of energy)",
-            "開發新低碳產品與服務 (Development of new products/services)",
-            "低碳產品與服務-研發與創新 (R&D and Innovation)",
-            "資源替代/多元化 (Resource substitutes/diversification)",
-            "公共部門的激勵措施 (Public sector incentives)",
-            "參與再生能源及高效能源計畫 (Participation in renewable energy markets)"
-        ]
+                # TCFD
+                "tcfd_risks": [
+                    "溫室氣體排放定價上升", "對現有商品與服務的法規強制", "現有商品與服務被低碳商品替代",
+                    "新技術投資成效不佳", "低碳轉型的轉型成本", "消費者行為改變",
+                    "氣候極端事件", "平均氣溫上升"
+                ],
+                "tcfd_opps": [
+                    "使用低排放能源", "開發新低碳產品與服務", "低碳產品與服務-研發與創新",
+                    "資源替代/多元化", "公共部門的激勵措施", "參與再生能源及高效能源計畫"
+                ],
 
-        # HRDD Topics
-        self.hrdd_topics = [
-            "強迫勞動/規模 (Forced Labor)",
-            "人口販運/範圍 (Human Trafficking)",
-            "童工/規模 (Child Labor)",
-            "性騷擾/範圍 (Sexual Harassment)",
-            "職場歧視(種族、性別等)/範圍 (Discrimination)",
-            "同工不同酬勞/範圍 (Equal Pay)",
-            "超時工作/規模 (Overtime)",
-            "未落實職業安全衛生/規模 (Occupational Safety)",
-            "剝奪自由結社權/範圍 (Freedom of Association)",
-            "無定期勞資會議/範圍 (No Regular Meetings)",
-            "無建立員工溝通管道/範圍 (No Communication Channels)",
-            "未遵守現行個資法之規範/範圍 (Privacy Compliance)",
-            "未落實個資保護之內部控制 (Internal Control for Privacy)",
-            "不遵守與同意國際人權原則 (Intl Human Rights Principles)",
-            "未對利害關係人宣達人權觀念 (Human Rights Communication)"
-        ]
-        
-        # 定義純文字字串，用於 Tooltip
-        self.hrdd_severity_def_text = """
-        Severity Definitions (嚴重度定義):
-        
-        1: 基礎傷害/沒有對利害關係人造成負面影響/1年內可以補救
-        2: 輕度傷害(需微修復)/對少部分(40%)利害關係人造成負面影響/1-3年內可以補救
-        3: 中度傷害(需長時間修復)/對大部分(60%)利害關係人造成負面影響/3-5年內可以補救
-        4: 嚴重傷害(需長時間修復)/對大部分(80%)利害關係人造成負面影響/5-7年內可以補救
-        5: 造成物理殘疾或死亡/對所有利害關係人造成負面影響/10年以上才以補救
-        """
+                # HRDD
+                "hrdd_topics": [
+                    "強迫勞動/規模", "人口販運/範圍", "童工/規模", "性騷擾/範圍",
+                    "職場歧視(種族、性別等)/範圍", "同工不同酬勞/範圍", "超時工作/規模",
+                    "未落實職業安全衛生/規模", "剝奪自由結社權/範圍", "無定期勞資會議/範圍",
+                    "無建立員工溝通管道/範圍", "未遵守現行個資法之規範/範圍", "未落實個資保護之內部控制",
+                    "不遵守與同意國際人權原則", "未對利害關係人宣達人權觀念"
+                ],
+                "hrdd_def": """
+                **嚴重度定義 (Severity):**
+                
+                * **1**: 基礎傷害/沒有對利害關係人造成負面影響/1年內可以補救
+                * **2**: 輕度傷害(需微修復)/對少部分(40%)利害關係人造成負面影響/1-3年內可以補救
+                * **3**: 中度傷害(需長時間修復)/對大部分(60%)利害關係人造成負面影響/3-5年內可以補救
+                * **4**: 嚴重傷害(需長時間修復)/對大部分(80%)利害關係人造成負面影響/5-7年內可以補救
+                * **5**: 造成物理殘疾或死亡/對所有利害關係人造成負面影響/10年以上才以補救
+                """
+            },
+            "en": {
+                # Stakeholder
+                "sh_rows": ["Supplier", "Customer", "Employee", "Shareholder/Investor", "Government", "Community/School/NPO"],
+                "sh_cols": ["Responsibility", "Influence", "Tension", "Diverse Perspectives", "Dependency"],
+                
+                # Materiality
+                "mat_topics": [
+                    "Sustainability Strategy", "Ethical Management", "Corporate Governance", "Risk Management",
+                    "Compliance", "Business Continuity Management", "Information Security", "Supplier Management",
+                    "Customer Relationship Management", "Tax Policies", "Operational Performance", 
+                    "Innovation and Digital Responsibility", "AI and Technological Transformation", 
+                    "Climate Change Adaptation", "Environment and Resource Management", "Biodiversity", 
+                    "Workplace Health and Safety", "Employee Cultivation and Career Development", 
+                    "Talent Attraction and Retention", "Social Care and Community Promotion", "Equal Human Rights"
+                ],
 
-    def get_text(self, key):
-        return self.texts[st.session_state.language][key]
+                # TCFD
+                "tcfd_risks": [
+                    "Rising GHG pricing", "Mandates on and regulation of existing products and services",
+                    "Substitution of existing products and services with lower emissions options",
+                    "Unsuccessful investment in new technologies", "Costs to transition to lower emissions technology",
+                    "Changing consumer behavior", "Extreme weather events", "Rising mean temperatures"
+                ],
+                "tcfd_opps": [
+                    "Use of lower-emission sources of energy", "Development and/or expansion of low emission goods and services",
+                    "R&D and Innovation", "Use of more efficient production and distribution processes",
+                    "Public sector incentives", "Participation in renewable energy markets"
+                ],
+
+                # HRDD (已翻譯)
+                "hrdd_topics": [
+                    "Forced Labor (Scale)", "Human Trafficking (Scope)", "Child Labor (Scale)", "Sexual Harassment (Scope)",
+                    "Discrimination (Race, Gender, etc.) (Scope)", "Unequal Pay (Scope)", "Excessive Overtime (Scale)",
+                    "Occupational Health & Safety Violations (Scale)", "Freedom of Association Violations (Scope)",
+                    "Lack of Regular Labor-Management Meetings (Scope)", "Lack of Employee Communication Channels (Scope)",
+                    "Non-compliance with Privacy Laws (Scope)", "Lack of Internal Controls for Data Privacy",
+                    "Non-compliance with Int'l Human Rights Principles", "Failure to Communicate Human Rights Concepts"
+                ],
+                "hrdd_def": """
+                **Severity Definitions:**
+                
+                * **1**: Basic injury / No negative impact on stakeholders / Remediable within 1 year
+                * **2**: Minor injury (minor repair needed) / Negative impact on minority (40%) / Remediable within 1-3 years
+                * **3**: Moderate injury (long repair needed) / Negative impact on majority (60%) / Remediable within 3-5 years
+                * **4**: Severe injury (long repair needed) / Negative impact on vast majority (80%) / Remediable within 5-7 years
+                * **5**: Physical disability or death / Negative impact on all stakeholders / Remediable only after 10+ years
+                """
+            }
+        }
+
+    def get_ui(self, key):
+        return self.ui_texts[st.session_state.language][key]
+
+    def get_content(self, key):
+        return self.content[st.session_state.language][key]
 
     # --- 輔助函式：置中橘色按鈕 ---
     def render_next_button(self, label, callback_func=None, args=None):
-        st.write("") # Spacer
         st.write("") 
-        # 使用 Columns 進行佈局置中：[1, 1, 1]
+        st.write("") 
         c1, c2, c3 = st.columns([1, 1, 1])
         with c2:
             if st.button(label, use_container_width=True):
@@ -185,11 +257,10 @@ class SustainabilityAssessment:
 
     # --- UI Pages ---
 
-    # PAGE 1: 語言選擇
+    # PAGE 0: 語言選擇
     def render_language_selection(self):
-        st.title("Language Selection / 語言選擇")
+        st.title(self.ui_texts['en']['step0_title']) # 雙語標題
         
-        # 置中顯示選項
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
             with st.container(border=True):
@@ -204,18 +275,19 @@ class SustainabilityAssessment:
             st.session_state.step = 1
             st.rerun()
 
+        # 按鈕這裡特殊處理，顯示雙語
         self.render_next_button("Next / 下一步", go_next)
 
-    # PAGE 2: 基本資料
+    # PAGE 1: 基本資料
     def render_entry_portal(self):
-        st.title(self.get_text("step1_title"))
+        st.title(self.get_ui("step1_title"))
         
         with st.container(border=True):
             col1, col2 = st.columns(2)
             with col1:
-                name = st.text_input(self.get_text("name"))
+                name = st.text_input(self.get_ui("name_label"))
             with col2:
-                dept = st.text_input(self.get_text("dept"))
+                dept = st.text_input(self.get_ui("dept_label"))
         
         def go_next():
             if name and dept:
@@ -223,39 +295,37 @@ class SustainabilityAssessment:
                 st.session_state.step = 2
                 st.rerun()
             else:
-                st.error(self.get_text("error_fill_all"))
+                st.error(self.get_ui("error_fill"))
 
-        self.render_next_button(self.get_text("next"), go_next)
+        self.render_next_button(self.get_ui("next_btn"), go_next)
 
-    # PAGE 3: Stakeholder (修正：移除 Form 以避免 Enter 跳頁)
+    # PAGE 2: Stakeholder
     def render_stakeholder(self):
-        st.title(self.get_text("step2_title"))
-        st.info("Score Definition: 0 (No relevant) - 5 (Very relevant)")
-        st.caption("Pressing 'Enter' will only update the score. Please click the button at the bottom to proceed.")
+        st.title(self.get_ui("step2_title"))
+        st.info(self.get_ui("score_def"))
+        st.caption(self.get_ui("enter_note"))
 
-        # 使用 Session State 暫存數據，如果還沒有就初始化
-        if 'temp_stakeholder_data' not in st.session_state:
-            st.session_state.temp_stakeholder_data = {}
+        rows = self.get_content("sh_rows")
+        cols_names = self.get_content("sh_cols")
 
         data = {}
-        for row in self.sh_rows:
-            st.subheader(row)
-            cols = st.columns(len(self.sh_cols))
+        # 遍歷每個利害關係人
+        for r_idx, row_name in enumerate(rows):
+            st.subheader(row_name)
+            cols = st.columns(len(cols_names))
             row_data = {}
-            for idx, col_name in enumerate(self.sh_cols):
-                key = f"sh_{row}_{idx}"
-                with cols[idx]:
-                    # 不使用 form，直接 input
-                    # 預設值邏輯：如果有存過就用存過的，沒有就預設 3
-                    default_val = st.session_state.temp_stakeholder_data.get(key, 3)
+            # 遍歷每個評分項目
+            for c_idx, col_name in enumerate(cols_names):
+                # 為了避免中英切換導致 key 混亂 (雖然此流程不允許中途切換)，使用索引做 key 的一部分會更安全
+                key = f"sh_{r_idx}_{c_idx}"
+                with cols[c_idx]:
                     val = st.number_input(
                         f"{col_name}", 
-                        min_value=0, max_value=5, value=default_val, 
+                        min_value=0, max_value=5, value=3, 
                         key=key
                     )
                     row_data[col_name] = val
-                    st.session_state.temp_stakeholder_data[key] = val # 即時更新暫存
-            data[row] = row_data
+            data[row_name] = row_data
             st.divider()
         
         def go_next():
@@ -263,22 +333,23 @@ class SustainabilityAssessment:
             st.session_state.step = 3
             st.rerun()
 
-        self.render_next_button(self.get_text("next"), go_next)
+        self.render_next_button(self.get_ui("next_btn"), go_next)
 
-    # PAGE 4: Materiality
+    # PAGE 3: Materiality
     def render_materiality(self):
-        st.title(self.get_text("step3_title"))
+        st.title(self.get_ui("step3_title"))
+        topics_list = self.get_content("mat_topics")
         
         # Part A: Topic Selection
         if not st.session_state.selected_materiality_topics:
-            st.subheader("Step 2.1: Select 10 Topics (選擇10個議題)")
+            st.subheader(self.get_ui("mat_select_instr"))
             selected = []
             cols = st.columns(2)
-            for i, topic in enumerate(self.mat_topics):
+            
+            for i, topic in enumerate(topics_list):
                 with cols[i % 2]:
-                    # 使用暫存 key 保持勾選狀態
-                    is_checked = st.checkbox(topic, key=f"mat_topic_{i}")
-                    if is_checked:
+                    # key 使用索引以保持唯一性
+                    if st.checkbox(topic, key=f"mat_topic_{i}"):
                         selected.append(topic)
             
             st.write(f"Selected: **{len(selected)}** / 10")
@@ -288,25 +359,25 @@ class SustainabilityAssessment:
                     st.session_state.selected_materiality_topics = selected
                     st.rerun()
                 else:
-                    st.error(self.get_text("error_select_10"))
+                    st.error(self.get_ui("error_select_10"))
             
-            self.render_next_button("Confirm Selection", confirm_selection)
+            self.render_next_button(self.get_ui("confirm_sel"), confirm_selection)
         
-        # Part B: Evaluation (移除 Reselect 按鈕)
+        # Part B: Evaluation
         else:
-            st.subheader("Step 2.2: Evaluate Selected Topics")
-            
-            # 不使用 Form，避免 UI 卡頓或過於擁擠，改為直接渲染
+            st.subheader(self.get_ui("mat_eval_instr"))
             results = []
-            for topic in st.session_state.selected_materiality_topics:
+            status_options = self.get_ui("status_opts")
+            
+            for i, topic in enumerate(st.session_state.selected_materiality_topics):
                 with st.expander(topic, expanded=True):
                     c1, c2, c3 = st.columns([1, 2, 2])
                     with c1:
-                        status = st.radio("Status", ["Actual (Happened)", "Potential (Not happened)"], key=f"status_{topic}")
+                        status = st.radio(self.get_ui("status_label"), status_options, key=f"mat_stat_{i}")
                     with c2:
-                        value = st.slider("Value Creation (Opportunities) [1-5]", 1, 5, 3, key=f"val_{topic}")
+                        value = st.slider(self.get_ui("val_label"), 1, 5, 3, key=f"mat_val_{i}")
                     with c3:
-                        prob = st.slider("Probability (Likelihood) [1-5]", 1, 5, 3, key=f"prob_{topic}")
+                        prob = st.slider(self.get_ui("prob_label"), 1, 5, 3, key=f"mat_prob_{i}")
                     
                     results.append({
                         "Topic": topic,
@@ -320,43 +391,44 @@ class SustainabilityAssessment:
                 st.session_state.step = 4
                 st.rerun()
 
-            self.render_next_button(self.get_text("next"), go_next)
+            self.render_next_button(self.get_ui("next_btn"), go_next)
 
-    # PAGE 5: TCFD
+    # PAGE 4: TCFD
     def render_tcfd(self):
-        st.title(self.get_text("step4_title"))
-        
+        st.title(self.get_ui("step4_title"))
         results = []
         
-        # Section 1: Risks (明顯區隔)
-        st.markdown(f"### 🛑 {self.get_text('risk_section')}")
-        st.markdown("---") # 分隔線
+        risks = self.get_content("tcfd_risks")
+        opps = self.get_content("tcfd_opps")
+        sev_txt = self.get_ui("sev_label")
+        like_txt = self.get_ui("like_label")
         
-        for item in self.tcfd_risks:
+        # Risks
+        st.markdown(f"### {self.get_ui('risk_header')}")
+        st.markdown("---")
+        for i, item in enumerate(risks):
             st.markdown(f"**{item}**")
             c1, c2 = st.columns(2)
             with c1:
-                # 修正：Label 只保留 Severity，不重複題目
-                sev = st.slider("Severity", 1, 5, 3, key=f"tcfd_risk_sev_{item}")
+                sev = st.slider(sev_txt, 1, 5, 3, key=f"risk_s_{i}")
             with c2:
-                like = st.slider("Likelihood", 1, 5, 3, key=f"tcfd_risk_like_{item}")
+                like = st.slider(like_txt, 1, 5, 3, key=f"risk_l_{i}")
             results.append({"Type": "Risk", "Topic": item, "Severity": sev, "Likelihood": like})
-            st.write("") # Spacer
+            st.write("") 
 
         st.write("")
         st.write("")
         
-        # Section 2: Opportunities (明顯區隔)
-        st.markdown(f"### 🌟 {self.get_text('opp_section')}")
-        st.markdown("---") # 分隔線
-        
-        for item in self.tcfd_opps:
+        # Opportunities
+        st.markdown(f"### {self.get_ui('opp_header')}")
+        st.markdown("---")
+        for i, item in enumerate(opps):
             st.markdown(f"**{item}**")
             c1, c2 = st.columns(2)
             with c1:
-                sev = st.slider("Value/Severity", 1, 5, 3, key=f"tcfd_opp_sev_{item}")
+                sev = st.slider(sev_txt, 1, 5, 3, key=f"opp_s_{i}")
             with c2:
-                like = st.slider("Likelihood", 1, 5, 3, key=f"tcfd_opp_like_{item}")
+                like = st.slider(like_txt, 1, 5, 3, key=f"opp_l_{i}")
             results.append({"Type": "Opportunity", "Topic": item, "Severity": sev, "Likelihood": like})
             st.write("")
 
@@ -365,45 +437,42 @@ class SustainabilityAssessment:
             st.session_state.step = 5
             st.rerun()
 
-        self.render_next_button(self.get_text("next"), go_next)
+        self.render_next_button(self.get_ui("next_btn"), go_next)
 
-    # PAGE 6: HRDD
+    # PAGE 5: HRDD
     def render_hrdd(self):
-        st.title(self.get_text("step5_title"))
+        st.title(self.get_ui("step5_title"))
         
-        # 修正：定義不在上方顯示，而是嵌入在 Severity 的 Tooltip 中
+        topics = self.get_content("hrdd_topics")
+        def_text = self.get_content("hrdd_def")
         
         results = []
-        st.subheader("Human Rights Topics Assessment")
         
-        for item in self.hrdd_topics:
+        for i, item in enumerate(topics):
             with st.container(border=True):
                 st.markdown(f"##### {item}")
-                
-                # 修正：欄位順序 Value Chain (左) -> Severity (中) -> Probability (右)
                 c1, c2, c3 = st.columns([1.5, 2, 2])
                 
                 with c1:
-                    st.write(f"**{self.get_text('hrdd_vc_label')}**")
-                    is_supp = st.checkbox("Supplier", key=f"hrdd_sup_{item}")
-                    is_cust = st.checkbox("Customer", key=f"hrdd_cust_{item}")
+                    st.write(f"**{self.get_ui('hrdd_vc')}**")
+                    is_supp = st.checkbox(self.get_ui('hrdd_sup'), key=f"hr_sup_{i}")
+                    is_cust = st.checkbox(self.get_ui('hrdd_cust'), key=f"hr_cust_{i}")
 
                 with c2:
-                    # 修正：Severity 標籤旁加入小問號 (help)，點擊/懸停顯示定義
                     sev = st.select_slider(
-                        label=self.get_text('hrdd_sev_label'),
+                        label=self.get_ui('hrdd_sev'),
                         options=[1, 2, 3, 4, 5], 
                         value=3,
-                        key=f"hrdd_sev_{item}",
-                        help=self.hrdd_severity_def_text # 這裡嵌入定義
+                        key=f"hr_sev_{i}",
+                        help=def_text  # 定義放在這裡
                     )
                 
                 with c3:
                     prob = st.select_slider(
-                        label=self.get_text('hrdd_prob_label'),
+                        label=self.get_ui('hrdd_prob'),
                         options=[1, 2, 3, 4, 5], 
                         value=3,
-                        key=f"hrdd_prob_{item}"
+                        key=f"hr_prob_{i}"
                     )
                 
                 results.append({
@@ -419,55 +488,56 @@ class SustainabilityAssessment:
             st.session_state.step = 6
             st.rerun()
 
-        self.render_next_button("Finish Assessment", go_next)
+        self.render_next_button(self.get_ui("finish_btn"), go_next)
 
-    # PAGE 7: FINISH
+    # PAGE 6: FINISH
     def generate_excel(self):
         output = io.BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
         
+        # 準備要插入的欄位名稱 (根據語言)
+        name_col = self.get_ui("name_label")
+        dept_col = self.get_ui("dept_label")
+        
         # Sheet 1: Stakeholder
         sh_df = st.session_state.data_stakeholder.copy()
-        sh_df.insert(0, "Department", st.session_state.user_info["Department"])
-        sh_df.insert(0, "Name", st.session_state.user_info["Name"])
+        sh_df.insert(0, dept_col, st.session_state.user_info["Department"])
+        sh_df.insert(0, name_col, st.session_state.user_info["Name"])
         sh_df.to_excel(writer, sheet_name='Stakeholder')
         
         # Sheet 2: Materiality
         mat_df = st.session_state.data_materiality.copy()
-        mat_df.insert(0, "Department", st.session_state.user_info["Department"])
-        mat_df.insert(0, "Name", st.session_state.user_info["Name"])
+        mat_df.insert(0, dept_col, st.session_state.user_info["Department"])
+        mat_df.insert(0, name_col, st.session_state.user_info["Name"])
         mat_df.to_excel(writer, sheet_name='Materiality', index=False)
         
         # Sheet 3: TCFD
         tcfd_df = st.session_state.data_tcfd.copy()
-        tcfd_df.insert(0, "Department", st.session_state.user_info["Department"])
-        tcfd_df.insert(0, "Name", st.session_state.user_info["Name"])
+        tcfd_df.insert(0, dept_col, st.session_state.user_info["Department"])
+        tcfd_df.insert(0, name_col, st.session_state.user_info["Name"])
         tcfd_df.to_excel(writer, sheet_name='TCFD', index=False)
         
         # Sheet 4: HRDD
         hrdd_df = st.session_state.data_hrdd.copy()
-        hrdd_df.insert(0, "Department", st.session_state.user_info["Department"])
-        hrdd_df.insert(0, "Name", st.session_state.user_info["Name"])
+        hrdd_df.insert(0, dept_col, st.session_state.user_info["Department"])
+        hrdd_df.insert(0, name_col, st.session_state.user_info["Name"])
         hrdd_df.to_excel(writer, sheet_name='HRDD', index=False)
         
         writer.close()
-        processed_data = output.getvalue()
-        return processed_data
+        return output.getvalue()
 
     def render_finish(self):
         st.balloons()
-        st.title("Assessment Completed! / 評估完成")
-        st.success("All steps finished. Please download your report below.")
+        st.title("Assessment Completed!")
         
         excel_data = self.generate_excel()
         file_name = f"{st.session_state.user_info['Name']}_{st.session_state.user_info['Department']}_Result.xlsx"
         
-        # 這裡的按鈕也需要置中與橘色
         st.write("")
         c1, c2, c3 = st.columns([1, 1, 1])
         with c2:
             st.download_button(
-                label=self.get_text("download_btn"),
+                label=self.get_ui("download_btn"),
                 data=excel_data,
                 file_name=file_name,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -475,7 +545,7 @@ class SustainabilityAssessment:
             )
             
             st.write("")
-            if st.button("Start Over / 重新開始", use_container_width=True):
+            if st.button(self.get_ui("start_over"), use_container_width=True):
                 st.session_state.clear()
                 st.rerun()
 
