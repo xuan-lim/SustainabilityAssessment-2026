@@ -51,8 +51,8 @@ class SustainabilityAssessment:
         # 暫存區
         if 'temp_stakeholder_data' not in st.session_state:
             st.session_state.temp_stakeholder_data = {}
-        if 'selected_materiality_topics' not in st.session_state:
-            st.session_state.selected_materiality_topics = []
+        if 'selected_materiality_indices' not in st.session_state:
+            st.session_state.selected_materiality_indices = [] # 改存索引 (Index) 以便中英互轉
             
         # 結果區
         if 'data_stakeholder' not in st.session_state:
@@ -144,11 +144,9 @@ class SustainabilityAssessment:
         # ---------------------------------------------------------
         self.content = {
             "zh": {
-                # Stakeholder
                 "sh_rows": ["供應商", "客戶", "員工", "股東/投資人", "政府機關", "社區/學校/非營利組織"],
                 "sh_cols": ["責任", "影響力", "張力", "多元觀點", "依賴性"],
                 
-                # Materiality
                 "mat_topics": [
                     "永續策略", "誠信經營", "公司治理", "風險控管", "法規遵循", "營運持續管理", 
                     "資訊安全", "供應商管理", "客戶關係管理", "稅務政策", "營運績效", 
@@ -157,7 +155,6 @@ class SustainabilityAssessment:
                     "社會關懷與鄰里促進", "人權平等"
                 ],
 
-                # TCFD
                 "tcfd_risks": [
                     "溫室氣體排放定價上升", "對現有商品與服務的法規強制", "現有商品與服務被低碳商品替代",
                     "新技術投資成效不佳", "低碳轉型的轉型成本", "消費者行為改變",
@@ -168,7 +165,6 @@ class SustainabilityAssessment:
                     "資源替代/多元化", "公共部門的激勵措施", "參與再生能源及高效能源計畫"
                 ],
 
-                # HRDD
                 "hrdd_topics": [
                     "強迫勞動/規模", "人口販運/範圍", "童工/規模", "性騷擾/範圍",
                     "職場歧視(種族、性別等)/範圍", "同工不同酬勞/範圍", "超時工作/規模",
@@ -187,11 +183,9 @@ class SustainabilityAssessment:
                 """
             },
             "en": {
-                # Stakeholder
                 "sh_rows": ["Supplier", "Customer", "Employee", "Shareholder/Investor", "Government", "Community/School/NPO"],
                 "sh_cols": ["Responsibility", "Influence", "Tension", "Diverse Perspectives", "Dependency"],
                 
-                # Materiality
                 "mat_topics": [
                     "Sustainability Strategy", "Ethical Management", "Corporate Governance", "Risk Management",
                     "Compliance", "Business Continuity Management", "Information Security", "Supplier Management",
@@ -202,7 +196,6 @@ class SustainabilityAssessment:
                     "Talent Attraction and Retention", "Social Care and Community Promotion", "Equal Human Rights"
                 ],
 
-                # TCFD
                 "tcfd_risks": [
                     "Rising GHG pricing", "Mandates on and regulation of existing products and services",
                     "Substitution of existing products and services with lower emissions options",
@@ -215,7 +208,6 @@ class SustainabilityAssessment:
                     "Public sector incentives", "Participation in renewable energy markets"
                 ],
 
-                # HRDD (已翻譯)
                 "hrdd_topics": [
                     "Forced Labor (Scale)", "Human Trafficking (Scope)", "Child Labor (Scale)", "Sexual Harassment (Scope)",
                     "Discrimination (Race, Gender, etc.) (Scope)", "Unequal Pay (Scope)", "Excessive Overtime (Scale)",
@@ -241,6 +233,10 @@ class SustainabilityAssessment:
 
     def get_content(self, key):
         return self.content[st.session_state.language][key]
+    
+    # 取得英文內容 (強制用於資料儲存)
+    def get_en_content(self, key):
+        return self.content['en'][key]
 
     # --- 輔助函式：置中橘色按鈕 ---
     def render_next_button(self, label, callback_func=None, args=None):
@@ -259,7 +255,7 @@ class SustainabilityAssessment:
 
     # PAGE 0: 語言選擇
     def render_language_selection(self):
-        st.title(self.ui_texts['en']['step0_title']) # 雙語標題
+        st.title(self.ui_texts['en']['step0_title']) 
         
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
@@ -275,7 +271,6 @@ class SustainabilityAssessment:
             st.session_state.step = 1
             st.rerun()
 
-        # 按鈕這裡特殊處理，顯示雙語
         self.render_next_button("Next / 下一步", go_next)
 
     # PAGE 1: 基本資料
@@ -291,6 +286,7 @@ class SustainabilityAssessment:
         
         def go_next():
             if name and dept:
+                # User info 保留原始輸入
                 st.session_state.user_info = {"Name": name, "Department": dept}
                 st.session_state.step = 2
                 st.rerun()
@@ -305,27 +301,41 @@ class SustainabilityAssessment:
         st.info(self.get_ui("score_def"))
         st.caption(self.get_ui("enter_note"))
 
-        rows = self.get_content("sh_rows")
-        cols_names = self.get_content("sh_cols")
+        # UI 顯示用的清單
+        rows_ui = self.get_content("sh_rows")
+        cols_names_ui = self.get_content("sh_cols")
+        
+        # 資料儲存用的清單 (強制英文)
+        rows_en = self.get_en_content("sh_rows")
+        cols_names_en = self.get_en_content("sh_cols")
 
         data = {}
-        # 遍歷每個利害關係人
-        for r_idx, row_name in enumerate(rows):
-            st.subheader(row_name)
-            cols = st.columns(len(cols_names))
+        
+        # 使用 enumerate 同時取得索引 (idx) 和 UI 顯示名稱
+        for r_idx, row_name_ui in enumerate(rows_ui):
+            st.subheader(row_name_ui) # 顯示：中文或英文
+            cols = st.columns(len(cols_names_ui))
+            
+            # 對應的英文名稱 (用於 Key)
+            row_name_en = rows_en[r_idx]
             row_data = {}
-            # 遍歷每個評分項目
-            for c_idx, col_name in enumerate(cols_names):
-                # 為了避免中英切換導致 key 混亂 (雖然此流程不允許中途切換)，使用索引做 key 的一部分會更安全
+            
+            for c_idx, col_name_ui in enumerate(cols_names_ui):
+                # 對應的英文欄位 (用於 Data)
+                col_name_en = cols_names_en[c_idx]
+                
                 key = f"sh_{r_idx}_{c_idx}"
                 with cols[c_idx]:
                     val = st.number_input(
-                        f"{col_name}", 
+                        f"{col_name_ui}", # 顯示：中文或英文
                         min_value=0, max_value=5, value=3, 
                         key=key
                     )
-                    row_data[col_name] = val
-            data[row_name] = row_data
+                    # 儲存：使用英文欄位名
+                    row_data[col_name_en] = val
+            
+            # 儲存：使用英文列名
+            data[row_name_en] = row_data
             st.divider()
         
         def go_next():
@@ -338,25 +348,27 @@ class SustainabilityAssessment:
     # PAGE 3: Materiality
     def render_materiality(self):
         st.title(self.get_ui("step3_title"))
-        topics_list = self.get_content("mat_topics")
+        
+        topics_ui = self.get_content("mat_topics")
+        topics_en = self.get_en_content("mat_topics") # 用於後續儲存
         
         # Part A: Topic Selection
-        if not st.session_state.selected_materiality_topics:
+        if not st.session_state.selected_materiality_indices:
             st.subheader(self.get_ui("mat_select_instr"))
-            selected = []
+            selected_indices = []
             cols = st.columns(2)
             
-            for i, topic in enumerate(topics_list):
+            for i, topic in enumerate(topics_ui):
                 with cols[i % 2]:
-                    # key 使用索引以保持唯一性
+                    # 顯示 UI 語言
                     if st.checkbox(topic, key=f"mat_topic_{i}"):
-                        selected.append(topic)
+                        selected_indices.append(i) # 只存索引，方便之後轉換
             
-            st.write(f"Selected: **{len(selected)}** / 10")
+            st.write(f"Selected: **{len(selected_indices)}** / 10")
             
             def confirm_selection():
-                if len(selected) == 10:
-                    st.session_state.selected_materiality_topics = selected
+                if len(selected_indices) == 10:
+                    st.session_state.selected_materiality_indices = selected_indices
                     st.rerun()
                 else:
                     st.error(self.get_ui("error_select_10"))
@@ -367,21 +379,33 @@ class SustainabilityAssessment:
         else:
             st.subheader(self.get_ui("mat_eval_instr"))
             results = []
-            status_options = self.get_ui("status_opts")
+            status_options_ui = self.get_ui("status_opts")
             
-            for i, topic in enumerate(st.session_state.selected_materiality_topics):
-                with st.expander(topic, expanded=True):
+            # 定義 Status 映射到英文
+            # status_options_ui[0] 是 "已發生 (Actual)" -> 存為 "Actual"
+            # status_options_ui[1] 是 "潛在 (Potential)" -> 存為 "Potential"
+            status_map = {
+                status_options_ui[0]: "Actual",
+                status_options_ui[1]: "Potential"
+            }
+            
+            for i in st.session_state.selected_materiality_indices:
+                # 取得對應語言的 Topic 用於顯示，英文 Topic 用於儲存
+                topic_display = topics_ui[i]
+                topic_save = topics_en[i]
+                
+                with st.expander(topic_display, expanded=True):
                     c1, c2, c3 = st.columns([1, 2, 2])
                     with c1:
-                        status = st.radio(self.get_ui("status_label"), status_options, key=f"mat_stat_{i}")
+                        status_ui = st.radio(self.get_ui("status_label"), status_options_ui, key=f"mat_stat_{i}")
                     with c2:
                         value = st.slider(self.get_ui("val_label"), 1, 5, 3, key=f"mat_val_{i}")
                     with c3:
                         prob = st.slider(self.get_ui("prob_label"), 1, 5, 3, key=f"mat_prob_{i}")
                     
                     results.append({
-                        "Topic": topic,
-                        "Status": status,
+                        "Topic": topic_save, # 存英文
+                        "Status": status_map[status_ui], # 存英文
                         "Value Creation": value,
                         "Probability": prob
                     })
@@ -398,22 +422,29 @@ class SustainabilityAssessment:
         st.title(self.get_ui("step4_title"))
         results = []
         
-        risks = self.get_content("tcfd_risks")
-        opps = self.get_content("tcfd_opps")
+        # UI 清單
+        risks_ui = self.get_content("tcfd_risks")
+        opps_ui = self.get_content("tcfd_opps")
+        # 英文清單 (儲存用)
+        risks_en = self.get_en_content("tcfd_risks")
+        opps_en = self.get_en_content("tcfd_opps")
+        
         sev_txt = self.get_ui("sev_label")
         like_txt = self.get_ui("like_label")
         
         # Risks
         st.markdown(f"### {self.get_ui('risk_header')}")
         st.markdown("---")
-        for i, item in enumerate(risks):
-            st.markdown(f"**{item}**")
+        for i, item_ui in enumerate(risks_ui):
+            st.markdown(f"**{item_ui}**")
             c1, c2 = st.columns(2)
             with c1:
                 sev = st.slider(sev_txt, 1, 5, 3, key=f"risk_s_{i}")
             with c2:
                 like = st.slider(like_txt, 1, 5, 3, key=f"risk_l_{i}")
-            results.append({"Type": "Risk", "Topic": item, "Severity": sev, "Likelihood": like})
+            
+            # 儲存英文 Topic
+            results.append({"Type": "Risk", "Topic": risks_en[i], "Severity": sev, "Likelihood": like})
             st.write("") 
 
         st.write("")
@@ -422,14 +453,16 @@ class SustainabilityAssessment:
         # Opportunities
         st.markdown(f"### {self.get_ui('opp_header')}")
         st.markdown("---")
-        for i, item in enumerate(opps):
-            st.markdown(f"**{item}**")
+        for i, item_ui in enumerate(opps_ui):
+            st.markdown(f"**{item_ui}**")
             c1, c2 = st.columns(2)
             with c1:
                 sev = st.slider(sev_txt, 1, 5, 3, key=f"opp_s_{i}")
             with c2:
                 like = st.slider(like_txt, 1, 5, 3, key=f"opp_l_{i}")
-            results.append({"Type": "Opportunity", "Topic": item, "Severity": sev, "Likelihood": like})
+            
+            # 儲存英文 Topic
+            results.append({"Type": "Opportunity", "Topic": opps_en[i], "Severity": sev, "Likelihood": like})
             st.write("")
 
         def go_next():
@@ -443,14 +476,16 @@ class SustainabilityAssessment:
     def render_hrdd(self):
         st.title(self.get_ui("step5_title"))
         
-        topics = self.get_content("hrdd_topics")
+        topics_ui = self.get_content("hrdd_topics")
+        topics_en = self.get_en_content("hrdd_topics") # 儲存用
+        
         def_text = self.get_content("hrdd_def")
         
         results = []
         
-        for i, item in enumerate(topics):
+        for i, item_ui in enumerate(topics_ui):
             with st.container(border=True):
-                st.markdown(f"##### {item}")
+                st.markdown(f"##### {item_ui}")
                 c1, c2, c3 = st.columns([1.5, 2, 2])
                 
                 with c1:
@@ -464,7 +499,7 @@ class SustainabilityAssessment:
                         options=[1, 2, 3, 4, 5], 
                         value=3,
                         key=f"hr_sev_{i}",
-                        help=def_text  # 定義放在這裡
+                        help=def_text
                     )
                 
                 with c3:
@@ -475,8 +510,9 @@ class SustainabilityAssessment:
                         key=f"hr_prob_{i}"
                     )
                 
+                # 儲存英文資訊
                 results.append({
-                    "Topic": item,
+                    "Topic": topics_en[i],
                     "Severity": sev,
                     "Probability": prob,
                     "Supplier (Value Chain)": 1 if is_supp else 0,
@@ -495,9 +531,9 @@ class SustainabilityAssessment:
         output = io.BytesIO()
         writer = pd.ExcelWriter(output, engine='xlsxwriter')
         
-        # 準備要插入的欄位名稱 (根據語言)
-        name_col = self.get_ui("name_label")
-        dept_col = self.get_ui("dept_label")
+        # 強制使用英文欄位頭 (Headers)
+        name_col = "Name"
+        dept_col = "Department"
         
         # Sheet 1: Stakeholder
         sh_df = st.session_state.data_stakeholder.copy()
