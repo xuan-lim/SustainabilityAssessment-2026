@@ -259,61 +259,61 @@ class SustainabilityAssessment:
   "tr1": {
     "zh": "極端降雨事件",
     "en": "Extreme rainfall events",
-    "def_zh": "背景：科技部TCCIP研究指出，未來颱風的生成呈現減少，而颱風帶來的降雨強度則呈現增加。風險：此型態的極端降雨將使得營運面臨更嚴重的颱風災害，包括市區淹水、道路坍方、淹水封閉等；因伊雲谷因服務性質，對於系統設備穩定性特別重視，當極端災害發生可能導致系統服務中斷，及人員傷亡，造成營運衝擊。",
+    "def_zh": "背景：科技部TCCIP研究指出，未來颱風的生成呈現減少，而颱風帶來的降雨強度則呈現增加。\n風險：此型態的極端降雨將使得營運面臨更嚴重的颱風災害，包括市區淹水、道路坍方、淹水封閉等；因伊雲谷因服務性質，對於系統設備穩定性特別重視，當極端災害發生可能導致系統服務中斷，及人員傷亡，造成營運衝擊。",
     "def_en": "Background: Research by the Ministry of Science and Technology's TCCIP indicates that the formation of typhoons is decreasing, while the intensity of rainfall brought by typhoons is increasing. Risks: This type of extreme rainfall will expose operations to more severe typhoon disasters, including urban flooding, road collapses, and flood closures. Because of the service nature of E-Cloud Valley, the stability of its system equipment is of paramount importance. Extreme disasters could lead to system service interruptions and personnel casualties, causing operational disruptions."
   },
   "tr2": {
     "zh": "長期氣候模式改變",
     "en": "Long-term climate pattern changes",
-    "def_zh": "背景：根據國家氣候變遷科學報告評估顯示，臺灣未來極端高溫日數將顯著增加，並伴隨更明顯的乾旱趨勢，反映出氣候模式長期改變的趨勢。這些變化可能對企業日常運作與環境條件造成影響。風險：持續高溫、乾旱及異常低溫情況可能帶來營運風險，如提高辦公場所能源使用需求與成本，並影響員工健康與工作效能。",
+    "def_zh": "背景：根據國家氣候變遷科學報告評估顯示，臺灣未來極端高溫日數將顯著增加，並伴隨更明顯的乾旱趨勢，反映出氣候模式長期改變的趨勢。這些變化可能對企業日常運作與環境條件造成影響。\n風險：持續高溫、乾旱及異常低溫情況可能帶來營運風險，如提高辦公場所能源使用需求與成本，並影響員工健康與工作效能。",
     "def_en": "Background: According to the National Climate Change Scientific Report, Taiwan is expected to experience a significant increase in the number of days with extreme high temperatures, accompanied by a more pronounced drought trend, reflecting a long-term shift in climate patterns. These changes may impact daily business operations and environmental conditions. Risks: Persistent high temperatures, drought, and abnormally low temperatures may pose operational risks, such as increased energy demands and costs in office spaces, and negatively impact employee health and work efficiency."
   },
   "tr3": {
     "zh": "溫室氣體排放價格上升",
     "en": "Rising greenhouse gas emission prices",
-    "def_zh": "背景：台灣已頒佈《氣候法》，溫室氣體排放將開始面臨各種費用與稅收。參考國際趨勢，每噸碳的價格預計逐步上升，海外營運據點也陸續實施碳稅或碳交易機制。若未來擴大海外營運，公司可能面臨營運成本增加的挑戰。風險：若減碳成效有限，公司未來可能面臨支付額外費用來覆蓋營運碳排放，增加營運成本。",
+    "def_zh": "背景：台灣已頒佈《氣候法》，溫室氣體排放將開始面臨各種費用與稅收。參考國際趨勢，每噸碳的價格預計逐步上升，海外營運據點也陸續實施碳稅或碳交易機制。若未來擴大海外營運，公司可能面臨營運成本增加的挑戰。\n風險：若減碳成效有限，公司未來可能面臨支付額外費用來覆蓋營運碳排放，增加營運成本。",
     "def_en": "Background: Taiwan has enacted the Climate Change Act, and greenhouse gas emissions will begin to face various fees and taxes. Referring to international trends, the price per ton of carbon is expected to gradually rise, and overseas operating locations are also gradually implementing carbon taxes or carbon trading mechanisms. If the company expands its overseas operations in the future, it may face the challenge of increased operating costs. Risk: If carbon reduction efforts are limited, the company may face additional costs to cover operational carbon emissions in the future, increasing operating costs."
   },
   "tr4": {
     "zh": "對既有的產品與服務增加強制性法規",
     "en": "Add mandatory regulations to existing products and services",
-    "def_zh": "背景：歐盟已發佈《CBAM》開始針對原物料課稅，全球各國開始針對各項碳排放源制定法規、費用政策等。風險：政府開始強制所有供應商(下游往上)都需要提供產品/服務碳足跡，以確保終端消費者以此為消費判斷，產生違規罰款、銷售成本增加等風險。",
+    "def_zh": "背景：歐盟已發佈《CBAM》開始針對原物料課稅，全球各國開始針對各項碳排放源制定法規、費用政策等。\n風險：政府開始強制所有供應商(下游往上)都需要提供產品/服務碳足跡，以確保終端消費者以此為消費判斷，產生違規罰款、銷售成本增加等風險。",
     "def_en": "Background: The EU has published the CBAM and begun taxing raw materials. Globally, countries are developing regulations and fee policies for various carbon emission sources. Risks: Governments are beginning to mandate that all suppliers provide the carbon footprint of their products and services for consumer decision-making, leading to potential fines for non-compliance and increased sales costs."
   },
   "tr5": {
     "zh": "溫室氣體盤查與揭露要求",
     "en": "Greenhouse gas inventory and disclosure requirements",
-    "def_zh": "背景：根據金管會「上市櫃公司永續發展行動方案」，上市櫃公司未來需揭露合併公司範圍內的溫室氣體盤查資訊，以確保碳排放數據的完整性與透明度，作為投資人與利益關係人評估企業永續績效的重要依據。風險：未如規定揭露溫室氣體盤查資訊，可能遭主管機關處分，並影響公司信譽與外部信任。",
+    "def_zh": "背景：根據金管會「上市櫃公司永續發展行動方案」，上市櫃公司未來需揭露合併公司範圍內的溫室氣體盤查資訊，以確保碳排放數據的完整性與透明度，作為投資人與利益關係人評估企業永續績效的重要依據。\n風險：未如規定揭露溫室氣體盤查資訊，可能遭主管機關處分，並影響公司信譽與外部信任。",
     "def_en": "Background: According to the Financial Supervisory Commission's Action Plan for the Sustainable Development of Listed Companies, companies will be required to disclose greenhouse gas inventories within their consolidated scope to ensure data integrity and transparency. Risk: Failure to disclose as required may result in regulatory penalties and damage to corporate reputation and trust."
   },
   "tr6": {
     "zh": "法律訴訟與合規",
     "en": "Legal proceedings and compliance",
-    "def_zh": "背景：法規日益嚴格，及利害關係人高度關注企業碳排放資訊，因此必須揭露正確、完整的溫室氣體盤查資料。風險：若資訊不完整或不正確，公司可能違反法規，並影響信譽與外部信任。",
+    "def_zh": "背景：法規日益嚴格，及利害關係人高度關注企業碳排放資訊，因此必須揭露正確、完整的溫室氣體盤查資料。\n風險：若資訊不完整或不正確，公司可能違反法規，並影響信譽與外部信任。",
     "def_en": "Background: Increasingly stringent regulations and heightened stakeholder scrutiny require accurate and complete greenhouse gas disclosures. Risk: Incomplete or inaccurate information may lead to regulatory violations and reputational damage."
   },
   "tr7": {
     "zh": "利害關係人的關注度上升或負面回饋",
     "en": "Increased stakeholder attention or negative feedback",
-    "def_zh": "背景：政府、投資人、供應鏈、客戶及員工等利害關係人高度關注企業永續、道德及環境表現，外部評比機構亦進行評分。風險：若永續績效不佳，可能遭受負面回饋，影響品牌形象與聲譽。",
+    "def_zh": "背景：政府、投資人、供應鏈、客戶及員工等利害關係人高度關注企業永續、道德及環境表現，外部評比機構亦進行評分。\n風險：若永續績效不佳，可能遭受負面回饋，影響品牌形象與聲譽。",
     "def_en": "Background: Governments, investors, supply chains, customers, employees, and rating agencies closely scrutinize corporate sustainability performance. Risk: Poor performance may result in negative feedback, damaging brand image and reputation."
   },
   "tr8": {
     "zh": "既有產品與服務的低碳排替代品",
     "en": "Low-carbon alternatives to existing products and services",
-    "def_zh": "背景：台灣進入碳有價時代，產品與服務的全生命週期碳足跡將影響成本與市場競爭。風險：市場出現更低碳的雲端與MSP服務，可能導致客戶轉換供應商，使公司競爭力下降。",
+    "def_zh": "背景：台灣進入碳有價時代，產品與服務的全生命週期碳足跡將影響成本與市場競爭。\n風險：市場出現更低碳的雲端與MSP服務，可能導致客戶轉換供應商，使公司競爭力下降。",
     "def_en": "Background: With carbon pricing, full life-cycle carbon footprints affect costs and competitiveness. Risk: Lower-carbon cloud and MSP services may attract customers, reducing the company's competitiveness."
   },
   "tr9": {
     "zh": "新技術投資成效不佳",
     "en": "Unsuccessful investment in new technologies",
-    "def_zh": "背景：氣候相關新技術快速發展，吸引企業投入資源。風險：若評估不足，可能因技術淘汰、市場策略不足或法規變動導致投資失敗。",
+    "def_zh": "背景：氣候相關新技術快速發展，吸引企業投入資源。\n風險：若評估不足，可能因技術淘汰、市場策略不足或法規變動導致投資失敗。",
     "def_en": "Background: Rapid development of climate-related technologies attracts investment. Risk: Inadequate assessment may lead to failure due to technological obsolescence, poor market strategy, or regulatory changes."
   },
   "tr10": {
     "zh": "低碳技術轉型的轉型成本",
     "en": "Transition costs of low-carbon technology transformation",
-    "def_zh": "背景：因應COP30能源轉型與碳管理要求，需調整營運模式與技術。風險：轉型過程將產生初期投資成本、資源限制及成本上升，影響營運穩定性與競爭力。",
+    "def_zh": "背景：因應COP30能源轉型與碳管理要求，需調整營運模式與技術。\n風險：轉型過程將產生初期投資成本、資源限制及成本上升，影響營運穩定性與競爭力。",
     "def_en": "Background: To meet COP30 energy transition and carbon management requirements, operational models and technologies must be adjusted. Risk: Initial investment, resource constraints, and rising costs may affect operational stability and competitiveness."
   }
         }
@@ -888,6 +888,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
