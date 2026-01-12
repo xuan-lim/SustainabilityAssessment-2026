@@ -129,10 +129,8 @@ class SustainabilityAssessment:
                 "status_help": "Issues currently happening at eCloudvalley / Issues not yet happened at eCloudvalley",
                 "opp_val_label": "Opportunity: Value Creation [1-5]",
                 "opp_prob_label": "Opportunity: Probability [1-5]",
-                "risk_imp_label": "
-Risk: Impact [1-5]",
-                "risk_prob_label": "
-Risk: Probability [1-5]",
+                "risk_imp_label": "Risk: Impact [1-5]",
+                "risk_prob_label": "Risk: Probability [1-5]",
                 "status_opts": ["Actual (Happened)", "Potential (Not happened)"],
                 "risk_header": "🛑 Risk Assessment",
                 "opp_header": "🌟 Opportunity Assessment",
@@ -901,6 +899,7 @@ Risk:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
