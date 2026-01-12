@@ -382,8 +382,6 @@ class SustainabilityAssessment:
   }
 }
 
-        }
-
         # =============================================================================================
         # 5. HRDD Topics (依據 CSV 更新)
         # =============================================================================================
@@ -890,5 +888,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
