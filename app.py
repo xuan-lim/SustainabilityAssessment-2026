@@ -155,24 +155,24 @@ class SustainabilityAssessment:
         }
         self.sh_cols_def = {
             "Responsibility": {
-                "zh": "責任：是否有法律、財務、營運法規或公約上的責任",
-                "en": "Responsibility: Legal, financial, operational regulations, or customary obligations."
+                "zh": "責任：部門是否對於利害關係人有法律、財務、營運法規或公約上的責任",
+                "en": "Responsibility: Does The Department has any legal, financial, operational regulations, or customary obligations."
             },
             "Influence": {
-                "zh": "影響力：是否有能力影響組織的策略決策",
-                "en": "Influence: Ability to impact the organization's strategic decision-making."
+                "zh": "影響力：利害關係人是否有能力影響部門的策略決策",
+                "en": "Influence: Does stakeholder has ability to impact The Department's strategic decision-making."
             },
             "Tension": {
-                "zh": "張力：是否在財務、環境或社會議題上有立即的衝突或關注需求",
-                "en": "Tension: Immediate conflicts or attention required regarding financial, environmental, or social issues."
+                "zh": "張力：部門是否對於利害關係人在財務、環境或社會議題上有立即的衝突或關注需求",
+                "en": "Tension: Does The Department need to take action immediately conflicts or attention required regarding financial, environmental, or social issues."
             },
             "Diverse Perspectives": {
-                "zh": "多元觀點：是否能帶來新的觀點、創新或市場理解",
-                "en": "Diverse Perspectives: Potential to bring new views, innovation, or market understanding."
+                "zh": "多元觀點：利害關係人是否為部門能帶來新的觀點、創新或市場理解",
+                "en": "Does stakeholder can brings diverse perspectives to The Department, like potential to bring new views, innovation, or market understanding."
             },
             "Dependency": {
-                "zh": "依賴性：對組織的依賴程度，或組織對其的依賴程度",
-                "en": "Dependency: Level of reliance on the organization (or vice versa)."
+                "zh": "依賴性：利害關係人對部門的依賴程度，或部門對其的依賴程度",
+                "en": "Dependency: Level of reliance of stakeholder on The Department (or vice versa)."
             }
         }
         self.sh_cols = {
@@ -888,6 +888,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
