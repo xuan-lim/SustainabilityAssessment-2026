@@ -260,8 +260,7 @@ class SustainabilityAssessment:
     "zh": "極端降雨事件",
     "en": "Extreme rainfall events",
     "def_zh": "背景：科技部TCCIP研究指出，未來颱風的生成呈現減少，而颱風帶來的降雨強度則呈現增加。\n風險：此型態的極端降雨將使得營運面臨更嚴重的颱風災害，包括市區淹水、道路坍方、淹水封閉等；因伊雲谷因服務性質，對於系統設備穩定性特別重視，當極端災害發生可能導致系統服務中斷，及人員傷亡，造成營運衝擊。",
-    "def_en": "Background: Research by the Ministry of Science and Technology's TCCIP indicates that the formation of typhoons is decreasing, while the intensity of rainfall brought by typhoons is increasing. \n
-Risk: This type of extreme rainfall will expose operations to more severe typhoon disasters, including urban flooding, road collapses, and flood closures. Because of the service nature of E-Cloud Valley, the stability of its system equipment is of paramount importance. Extreme disasters could lead to system service interruptions and personnel casualties, causing operational disruptions."
+    "def_en": "Background: Research by the Ministry of Science and Technology's TCCIP indicates that the formation of typhoons is decreasing, while the intensity of rainfall brought by typhoons is increasing. \nRisk: This type of extreme rainfall will expose operations to more severe typhoon disasters, including urban flooding, road collapses, and flood closures. Because of the service nature of E-Cloud Valley, the stability of its system equipment is of paramount importance. Extreme disasters could lead to system service interruptions and personnel casualties, causing operational disruptions."
   },
   "tr2": {
     "zh": "長期氣候模式改變",
@@ -899,6 +898,7 @@ Risk:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
