@@ -670,8 +670,7 @@ class SustainabilityAssessment:
                         opp_val = st.slider(self.get_ui("opp_val_label"), 1, 5, 3, key=f"mat_oval_{key}")
                         opp_prob = st.slider(self.get_ui("opp_prob_label"), 1, 5, 3, key=f"mat_oprob_{key}")
                         
-                    with c_
-Risk:
+                    with c_Risk:
                         st.markdown(f"#### {self.get_ui('risk_header')}")
                         risk_imp = st.slider(self.get_ui("risk_imp_label"), 1, 5, 3, key=f"mat_rimp_{key}")
                         risk_prob = st.slider(self.get_ui("risk_prob_label"), 1, 5, 3, key=f"mat_rprob_{key}")
@@ -889,6 +888,7 @@ Risk:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
