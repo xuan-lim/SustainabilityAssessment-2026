@@ -320,7 +320,6 @@ class SustainabilityAssessment:
 
         # Opportunities
         self.tcfd_opp_data = {
-            {
   "to1": {
     "zh": "使用低碳排的能源",
     "en": "Use low-carbon energy",
@@ -891,4 +890,5 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
