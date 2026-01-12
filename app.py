@@ -316,6 +316,7 @@ class SustainabilityAssessment:
     "def_zh": "背景：因應COP30能源轉型與碳管理要求，需調整營運模式與技術。風險：轉型過程將產生初期投資成本、資源限制及成本上升，影響營運穩定性與競爭力。",
     "def_en": "Background: To meet COP30 energy transition and carbon management requirements, operational models and technologies must be adjusted. Risk: Initial investment, resource constraints, and rising costs may affect operational stability and competitiveness."
   }
+        }
 
         # Opportunities
         self.tcfd_opp_data = {
@@ -890,3 +891,4 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
