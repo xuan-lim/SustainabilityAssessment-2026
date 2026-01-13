@@ -4,78 +4,23 @@ import io
 import streamlit.components.v1 as components
 import time
 
-# Put this BEFORE any st.title, st.header, or other content
-if 'nav_timestamp' in st.session_state:
-    components.html(f"""
+# At the very top of your main app, before any content
+st.markdown('<span id="top"></span>', unsafe_allow_html=True)
+    components.html("""
     <script>
-        // Use timestamp to ensure fresh execution: {st.session_state.nav_timestamp}
-        
-        (function scrollNow() {{
-            function doScroll() {{
-                try {{
-                    // Method 1: Direct parent scroll
-                    if (window.parent) {{
-                        window.parent.scroll(0, 0);
-                        window.parent.scrollTo({{top: 0, left: 0, behavior: 'instant'}});
-                    }}
-                    
-                    // Method 2: Find all scrollable Streamlit elements
-                    const doc = window.parent.document;
-                    if (doc) {{
-                        // Scroll document itself
-                        doc.documentElement.scrollTop = 0;
-                        doc.body.scrollTop = 0;
-                        
-                        // Scroll main content areas
-                        const selectors = [
-                            'section.main',
-                            '[data-testid="stAppViewContainer"]',
-                            '[data-testid="stApp"]',
-                            'section[tabindex="-1"]',
-                            '.main .block-container'
-                        ];
-                        
-                        selectors.forEach(function(sel) {{
-                            const elements = doc.querySelectorAll(sel);
-                            elements.forEach(function(el) {{
-                                if (el) {{
-                                    el.scrollTop = 0;
-                                    el.scrollTo({{top: 0, left: 0, behavior: 'instant'}});
-                                }}
-                            }});
-                        }});
-                    }}
-                }} catch(e) {{
-                    console.log('Scroll error:', e);
-                }}
-            }}
-            
-            // Execute immediately
-            doScroll();
-            
-            // Execute on DOM ready
-            if (document.readyState === 'loading') {{
-                document.addEventListener('DOMContentLoaded', doScroll);
-            }}
-            
-            // Execute multiple times with delays to catch late renders
-            setTimeout(doScroll, 0);
-            setTimeout(doScroll, 10);
-            setTimeout(doScroll, 50);
-            setTimeout(doScroll, 100);
-            setTimeout(doScroll, 200);
-            
-            // Use requestAnimationFrame for next render
-            requestAnimationFrame(doScroll);
-            requestAnimationFrame(function() {{
-                setTimeout(doScroll, 0);
-            }});
-        }})();
+    function scroll() {
+        try {
+            window.parent.location.href = '#top';
+            const main = window.parent.document.querySelector('section.main');
+            if (main) main.scrollTop = 0;
+            window.parent.scrollTo(0, 0);
+        } catch(e) {}
+    }
+    scroll();
+    setTimeout(scroll, 50);
+    setTimeout(scroll, 100);
     </script>
     """, height=0)
-    
-    # Remove the timestamp after use
-    del st.session_state.nav_timestamp
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -968,6 +913,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
