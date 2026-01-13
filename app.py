@@ -877,6 +877,9 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
+        # 1. This hidden anchor helps browsers focus on the top of the page upon rerun
+        st.markdown("<div id='top'></div>", unsafe_allow_html=True)
+        
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -888,6 +891,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
