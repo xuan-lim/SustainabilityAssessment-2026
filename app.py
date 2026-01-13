@@ -503,11 +503,21 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
+                    st.session_state.needs_scroll = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
+                # Execute callback first (for validation, data processing, etc.)
                 if next_callback:
-                    next_callback(next_args) if next_args else next_callback()
+                    result = next_callback(next_args) if next_args else next_callback()
+                
+                    # If callback returns False, don't proceed (validation failed)
+                    if result is False:
+                        st.stop()
+            
+                # Always scroll and rerun after next button
+                st.session_state.needs_scroll = True
+                st.rerun()
 
     # --- UI Pages ---
 
@@ -888,6 +898,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
