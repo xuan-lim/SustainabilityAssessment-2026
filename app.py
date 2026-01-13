@@ -1,6 +1,54 @@
 import streamlit as st
 import pandas as pd
 import io
+import streamlit.components.v1 as components
+
+# Check if we need to scroll to top after navigation
+if st.session_state.get('scroll_to_top', False):
+    components.html("""
+    <script>
+    (function() {
+        function forceScrollTop() {
+            try {
+                // Scroll parent window
+                if (window.parent) {
+                    window.parent.scrollTo(0, 0);
+                }
+                
+                // Scroll Streamlit containers
+                const selectors = [
+                    'section.main',
+                    '[data-testid="stAppViewContainer"]',
+                    'section[tabindex="-1"]'
+                ];
+                
+                selectors.forEach(selector => {
+                    const el = window.parent.document.querySelector(selector);
+                    if (el) {
+                        el.scrollTop = 0;
+                        el.scrollTo(0, 0);
+                    }
+                });
+                
+                // Scroll document
+                if (window.parent.document) {
+                    window.parent.document.documentElement.scrollTop = 0;
+                    window.parent.document.body.scrollTop = 0;
+                }
+            } catch(e) {}
+        }
+        
+        // Execute multiple times to ensure it works
+        forceScrollTop();
+        setTimeout(forceScrollTop, 10);
+        setTimeout(forceScrollTop, 50);
+        setTimeout(forceScrollTop, 100);
+    })();
+    </script>
+    """, height=0)
+    
+    # Clear the flag after scrolling
+    st.session_state.scroll_to_top = False
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -503,11 +551,13 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
+                    st.session_state.scroll_to_top = True  # Add this flag
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
+                st.session_state.scroll_to_top = True  # Add this flag
 
     # --- UI Pages ---
 
@@ -888,6 +938,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
