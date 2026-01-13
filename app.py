@@ -59,6 +59,17 @@ class SustainabilityAssessment:
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
+    # Scroll to top function
+    def scroll_to_top(self):
+        st.components.v1.html(
+            """
+            <script>
+                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+            </script>
+            """,
+            height=0
+        )
+    
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -503,21 +514,13 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.needs_scroll = True
+                    st.session_state.scroll_top = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
-                # Execute callback first (for validation, data processing, etc.)
+                st.session_state.scroll_top = True
                 if next_callback:
-                    result = next_callback(next_args) if next_args else next_callback()
-                
-                    # If callback returns False, don't proceed (validation failed)
-                    if result is False:
-                        st.stop()
-            
-                # Always scroll and rerun after next button
-                st.session_state.needs_scroll = True
-                st.rerun()
+                    next_callback(next_args) if next_args else next_callback()
 
     # --- UI Pages ---
 
@@ -887,56 +890,17 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # CRITICAL: Place scroll logic HERE, before rendering any page
-        if st.session_state.get('needs_scroll', False):
-            st.markdown('<span id="top"></span>', unsafe_allow_html=True)
-            components.html("""
-            <script>
-            function scroll() {
-                try {
-                    window.parent.location.href = '#top';
-                    const main = window.parent.document.querySelector('section.main');
-                    if (main) {
-                        main.scrollTop = 0;
-                        main.scrollTo(0, 0);
-                   }
-                    window.parent.scrollTo(0, 0);
-                    window.parent.document.documentElement.scrollTop = 0;
-                } catch(e) {
-                    console.log('Scroll error:', e);
-                }
-            }
-            scroll();
-            setTimeout(scroll, 1);
-            setTimeout(scroll, 50);
-            setTimeout(scroll, 100);
-            setTimeout(scroll, 200);
-            </script>
-            """, height=0)
-            st.session_state.needs_scroll = False
-    
-    # Now render the appropriate page
-        if st.session_state.step == 0: 
-            self.render_language_selection()
-        elif st.session_state.step == 1: 
-            self.render_entry_portal()
-        elif st.session_state.step == 2: 
-            self.render_stakeholder()
-        elif st.session_state.step == 3: 
-            self.render_materiality()
-        elif st.session_state.step == 4: 
-            self.render_tcfd()
-        elif st.session_state.step == 5: 
-            self.render_hrdd()
-        elif st.session_state.step == 6: 
-            self.render_finish()
-  
+        if st.session_state.step == 0: self.render_language_selection()
+        elif st.session_state.step == 1: self.render_entry_portal()
+        elif st.session_state.step == 2: self.render_stakeholder()
+        elif st.session_state.step == 3: self.render_materiality()
+        elif st.session_state.step == 4: self.render_tcfd()
+        elif st.session_state.step == 5: self.render_hrdd()
+        elif st.session_state.step == 6: self.render_finish()
+
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
-
 
 
 
