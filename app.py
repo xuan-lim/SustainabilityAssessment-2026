@@ -61,20 +61,36 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
             
     def scroll_to_top(self):
+# 強化版：結合 Hash 跳轉、延遲執行與多重捲動重置
         components.html(
-                    """
-                    <script>
-                        // 強制瀏覽器最外層視窗（包含 Streamlit 的 Toolbar）回到頂部
+            f"""
+            <script>
+                (function() {{
+                    // 1. 強制讓父視窗網址加上錨點，誘發瀏覽器原生跳轉
+                    window.parent.location.hash = 'top'; 
+                    window.parent.location.hash = 'language-selection';
+
+                    // 2. 使用延遲，確保在 Streamlit 渲染完畢後才執行捲動
+                    setTimeout(function() {{
+                        // 強制父視窗物理歸零
                         window.parent.window.scrollTo(0, 0);
                         
-                        // 雙重保險：針對內容捲動區也執行一次
-                        var mainContent = window.parent.document.querySelector('section.main');
-                        if (mainContent) {
-                            mainContent.scrollTo(0, 0);
-                        }
-                    </script>
-                    """,
-                    height=0,
+                        // 針對 Streamlit 內部的主要捲動區塊強制歸零
+                        var mainSections = window.parent.document.querySelectorAll('section.main');
+                        mainSections.forEach(function(sec) {{
+                            sec.scrollTo(0, 0);
+                        }});
+
+                        // 3. 嘗試直接將最頂部的 root 元素拉到視線內
+                        var root = window.parent.document.getElementById('root');
+                        if (root) {{
+                            root.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
+                    }}, 50); // 延遲 50 毫秒效果最穩定
+                }})();
+            </script>
+            """,
+            height=0,
             )
     def setup_data(self):
         # =============================================================================================
@@ -894,7 +910,10 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 執行強制捲動
+        # 在整個頁面最頂端（甚至在 Toolbar 下方一點點）埋設 ID
+        st.markdown('<div id="language-selection" style="position:absolute; top:-100px;"></div>', unsafe_allow_html=True)
+        
+        # 執行強化版回頂部函式
         self.scroll_to_top()
         
         if st.session_state.step == 0: self.render_language_selection()
@@ -908,6 +927,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
