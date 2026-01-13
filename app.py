@@ -61,38 +61,20 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # The 'key' parameter is CRITICAL here. It changes with every step,
-            # forcing Streamlit to re-execute this Javascript every time you click Next/Back.
-            components.html(
-                f"""
-                <script>
-                    // Use a small timeout to ensure the page has rendered
-                    setTimeout(function() {{
-                        // 1. Scroll the main window
-                        window.scrollTo(0, 0);
-                        
-                        // 2. Scroll the parent window (if in iframe)
-                        if (window.parent) {{
-                            window.parent.scrollTo(0, 0);
-                        }}
-    
-                        // 3. Scroll Streamlit's specific container class
-                        var mainContainer = window.parent.document.querySelector('section.main');
-                        if (mainContainer) {{
-                            mainContainer.scrollTo(0, 0);
-                        }}
-                        
-                        // 4. Fallback: Scroll to our specific anchor
-                        var topAnchor = window.parent.document.getElementById('top-marker');
-                        if (topAnchor) {{
-                            topAnchor.scrollIntoView({{behavior: "instant", block: "start"}});
-                        }}
-                    }}, 100); // 100ms delay to beat the render race
-                </script>
-                """,
-                height=0,
-                key=f"scroll_to_top_{st.session_state.step}"  # <--- THIS FIXES THE ISSUE
-            )
+        components.html(
+                    f"""
+                    <script>
+                        setTimeout(function() {{
+                            window.scrollTo(0, 0);
+                            if (window.parent) {{ window.parent.scrollTo(0, 0); }}
+                            var mainContainer = window.parent.document.querySelector('section.main');
+                            if (mainContainer) {{ mainContainer.scrollTo(0, 0); }}
+                        }}, 100);
+                    </script>
+                    """,
+                    height=0,
+                    key=f"scroll_to_top_{st.session_state.step}"
+                )
     
     def setup_data(self):
         # =============================================================================================
@@ -930,6 +912,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
