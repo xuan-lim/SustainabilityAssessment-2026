@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -887,6 +888,7 @@ class SustainabilityAssessment:
 
     def run(self):
         self.scroll_to_top()
+        steps = [
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -894,10 +896,11 @@ class SustainabilityAssessment:
         elif st.session_state.step == 4: self.render_tcfd()
         elif st.session_state.step == 5: self.render_hrdd()
         elif st.session_state.step == 6: self.render_finish()
-
+]
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
