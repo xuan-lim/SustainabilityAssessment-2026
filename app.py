@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -50,16 +49,7 @@ class SustainabilityAssessment:
         if 'user_info' not in st.session_state: st.session_state.user_info = {}
         if 'temp_stakeholder_data' not in st.session_state: st.session_state.temp_stakeholder_data = {}
         if 'selected_materiality_keys' not in st.session_state: st.session_state.selected_materiality_keys = []
-    def scroll_to_top(self):
-        # 透過注入 JS 讓 Streamlit 的主要容器捲動回頂部
-        st.components.v1.html(
-            """
-            <script>
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
-            </script>
-            """,
-            height=0,
-        )         
+    
         # 結果存儲
         if 'data_stakeholder' not in st.session_state: st.session_state.data_stakeholder = None
         if 'data_materiality' not in st.session_state: st.session_state.data_materiality = None
@@ -887,8 +877,6 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        self.scroll_to_top()
-        steps = [
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -900,6 +888,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
