@@ -917,12 +917,12 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 1. 將物理錨點放在最最前面
+        # 1. 埋設錨點
         st.markdown('<div id="top-marker"></div>', unsafe_allow_html=True)
         
-        # 2. 執行多段式捲動
+        # 2. 呼叫帶有判斷邏輯的捲動函式
         self.scroll_to_top()
-        
+                
         # 3. 渲染頁面內容 (這部分會消耗時間渲染)
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
@@ -935,6 +935,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
