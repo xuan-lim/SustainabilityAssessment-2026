@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -34,6 +33,31 @@ st.markdown("""
     div[data-baseweb="tooltip"] {
         width: 300px;
         white-space: pre-wrap;
+        
+    /* Floating Go to Top Button */
+        .topBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+            background-color: #f0f2f6;
+            border: 1px solid #d6d6d6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #31333F;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+    .topBtn:hover {
+        background-color: #FF8C00;
+        color: white;
+    }
+        
     }
     </style>
     """, unsafe_allow_html=True)
@@ -878,21 +902,18 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-            # 1. Force scroll to top using JavaScript. 
-            # Since 'key' is not supported in st.components.v1.html, we just place it here.
-            components.html(
-                """
-                <script>
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    if (mainSection) {
-                        mainSection.scrollTo({ top: 0, behavior: 'instant' });
-                    }
-                </script>
-                """,
-                height=0
-            )
+            # 1. Create an invisible anchor at the very top
+            st.markdown("<div id='top'></div>", unsafe_allow_html=True)
     
-            # 2. Your existing page routing logic
+            # 2. Render the floating button using HTML
+            # The href='#top' will jump the browser to the anchor defined above
+            st.markdown("""
+                <a class="topBtn" href="#top" title="Go to top">
+                    ▲
+                </a>
+                """, unsafe_allow_html=True)
+    
+            # Existing navigation logic
             if st.session_state.step == 0: self.render_language_selection()
             elif st.session_state.step == 1: self.render_entry_portal()
             elif st.session_state.step == 2: self.render_stakeholder()
@@ -904,10 +925,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
-
-
 
 
 
