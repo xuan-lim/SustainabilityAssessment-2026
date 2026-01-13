@@ -878,17 +878,19 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # This snippet forces the Streamlit main scroll container to the top
-        st.components.v1.html(
-            """
+        # This snippet forces the browser to scroll to the top 
+        # whenever the 'step' number changes.
+        components.html(
+            f"""
             <script>
                 var mainSection = window.parent.document.querySelector('section.main');
-                if (mainSection) {
-                    mainSection.scrollTo(0,0);
-                }
+                if (mainSection) {{
+                    mainSection.scrollTo({{ top: 0, behavior: 'instant' }});
+                }}
             </script>
             """,
             height=0,
+            key=f"scroll_anchor_{st.session_state.step}" # Key ensures it runs every step change
         )
 
         if st.session_state.step == 0: self.render_language_selection()
@@ -902,6 +904,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
