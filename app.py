@@ -59,33 +59,34 @@ class SustainabilityAssessment:
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
-     def scroll_to_top(self):
-            # 強化版：直接修改父層網址的 hash 並強制執行捲動
-            components.html(
-                f"""
-                <script>
-                    (function() {{
-                        // 1. 強制修改父層網址為 #language-selection
-                        window.parent.location.hash = 'language-selection';
+            
+    def scroll_to_top(self):
+        # 強化版：直接修改父層網址的 hash 並強制執行捲動
+        components.html(
+            f"""
+            <script>
+                (function() {{
+                    // 1. 強制修改父層網址為 #language-selection
+                    window.parent.location.hash = 'language-selection';
+                    
+                    // 2. 針對某些瀏覽器，額外執行一次 scrollTo
+                    setTimeout(function() {{
+                        window.parent.window.scrollTo(0, 0);
+                        var mainSection = window.parent.document.querySelector('section.main');
+                        if (mainSection) {{
+                            mainSection.scrollTo(0, 0);
+                        }}
                         
-                        // 2. 針對某些瀏覽器，額外執行一次 scrollTo
-                        setTimeout(function() {{
-                            window.parent.window.scrollTo(0, 0);
-                            var mainSection = window.parent.document.querySelector('section.main');
-                            if (mainSection) {{
-                                mainSection.scrollTo(0, 0);
-                            }}
-                            
-                            // 3. 尋找剛剛埋下的 div 並確保它在視線最上方
-                            var element = window.parent.document.getElementById('language-selection');
-                            if (element) {{
-                                element.scrollIntoView({{behavior: 'instant', block: 'start'}});
-                            }}
-                        }}, 10);
-                    }})();
-                </script>
-                """,
-                height=0,
+                        // 3. 尋找剛剛埋下的 div 並確保它在視線最上方
+                        var element = window.parent.document.getElementById('language-selection');
+                        if (element) {{
+                            element.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
+                    }}, 10);
+                }})();
+            </script>
+            """,
+            height=0,
             )
     def setup_data(self):
         # =============================================================================================
@@ -922,6 +923,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
