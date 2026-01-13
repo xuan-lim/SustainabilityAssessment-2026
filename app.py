@@ -58,7 +58,15 @@ class SustainabilityAssessment:
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
-
+    def scroll_to_top():
+        st.markdown(
+            """
+            <script>
+                window.scrollTo({ top: 0, behavior: "instant" });
+            </script>
+            """,
+            unsafe_allow_html=True
+        )
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -526,6 +534,7 @@ class SustainabilityAssessment:
         def go_next():
             st.session_state.language = lang
             st.session_state.step = 1
+            scroll_to_top() 
             st.rerun()
 
         self.render_nav_buttons("Next / 下一步", go_next, back_visible=False)
@@ -544,6 +553,7 @@ class SustainabilityAssessment:
             if name and dept:
                 st.session_state.user_info = {"Name": name, "Department": dept}
                 st.session_state.step = 2
+                scroll_to_top() 
                 st.rerun()
             else:
                 st.error(self.get_ui("error_fill"))
@@ -592,6 +602,7 @@ class SustainabilityAssessment:
         def go_next():
             st.session_state.data_stakeholder = pd.DataFrame.from_dict(data, orient='index')
             st.session_state.step = 3
+            scroll_to_top() 
             st.rerun()
 
         self.render_nav_buttons(self.get_ui("next_btn"), go_next)
@@ -687,6 +698,7 @@ class SustainabilityAssessment:
             def go_next():
                 st.session_state.data_materiality = pd.DataFrame(results)
                 st.session_state.step = 4
+                scroll_to_top() 
                 st.rerun()
 
             self.render_nav_buttons(self.get_ui("next_btn"), go_next)
@@ -742,6 +754,7 @@ class SustainabilityAssessment:
         def go_next():
             st.session_state.data_tcfd = pd.DataFrame(results)
             st.session_state.step = 5
+            scroll_to_top() 
             st.rerun()
 
         self.render_nav_buttons(self.get_ui("next_btn"), go_next)
@@ -818,6 +831,7 @@ class SustainabilityAssessment:
             st.session_state.data_hrdd = pd.DataFrame(temp_results)
             st.session_state.step = 6
             st.session_state.just_finished = True
+            scroll_to_top() 
             st.rerun()
 
         self.render_nav_buttons(self.get_ui("finish_btn"), go_next)
@@ -888,6 +902,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
