@@ -59,6 +59,40 @@ class SustainabilityAssessment:
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
+    def scroll_to_top(self):
+            # The 'key' parameter is CRITICAL here. It changes with every step,
+            # forcing Streamlit to re-execute this Javascript every time you click Next/Back.
+            components.html(
+                f"""
+                <script>
+                    // Use a small timeout to ensure the page has rendered
+                    setTimeout(function() {{
+                        // 1. Scroll the main window
+                        window.scrollTo(0, 0);
+                        
+                        // 2. Scroll the parent window (if in iframe)
+                        if (window.parent) {{
+                            window.parent.scrollTo(0, 0);
+                        }}
+    
+                        // 3. Scroll Streamlit's specific container class
+                        var mainContainer = window.parent.document.querySelector('section.main');
+                        if (mainContainer) {{
+                            mainContainer.scrollTo(0, 0);
+                        }}
+                        
+                        // 4. Fallback: Scroll to our specific anchor
+                        var topAnchor = window.parent.document.getElementById('top-marker');
+                        if (topAnchor) {{
+                            topAnchor.scrollIntoView({{behavior: "instant", block: "start"}});
+                        }}
+                    }}, 100); // 100ms delay to beat the render race
+                </script>
+                """,
+                height=0,
+                key=f"scroll_to_top_{st.session_state.step}"  # <--- THIS FIXES THE ISSUE
+            )
+    
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -877,17 +911,25 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        if st.session_state.step == 0: self.render_language_selection()
-        elif st.session_state.step == 1: self.render_entry_portal()
-        elif st.session_state.step == 2: self.render_stakeholder()
-        elif st.session_state.step == 3: self.render_materiality()
-        elif st.session_state.step == 4: self.render_tcfd()
-        elif st.session_state.step == 5: self.render_hrdd()
-        elif st.session_state.step == 6: self.render_finish()
+            # 1. Place an invisible marker at the absolute top of the page
+            st.markdown('<div id="top-marker" style="position:absolute; top:-50px;"></div>', unsafe_allow_html=True)
+            
+            # 2. Trigger the scroll function (which now has a unique key per step)
+            self.scroll_to_top()
+    
+            # 3. Render the specific step
+            if st.session_state.step == 0: self.render_language_selection()
+            elif st.session_state.step == 1: self.render_entry_portal()
+            elif st.session_state.step == 2: self.render_stakeholder()
+            elif st.session_state.step == 3: self.render_materiality()
+            elif st.session_state.step == 4: self.render_tcfd()
+            elif st.session_state.step == 5: self.render_hrdd()
+            elif st.session_state.step == 6: self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
