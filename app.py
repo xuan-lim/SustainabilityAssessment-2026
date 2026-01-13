@@ -73,12 +73,12 @@ class SustainabilityAssessment:
                     // 2. 使用延遲，確保在 Streamlit 渲染完畢後才執行捲動
                     setTimeout(function() {{
                         // 強制父視窗物理歸零
-                        window.parent.window.scrollTo(-10, -10);
+                        window.parent.window.scrollTo(-100, -100);
                         
                         // 針對 Streamlit 內部的主要捲動區塊強制歸零
                         var mainSections = window.parent.document.querySelectorAll('section.main');
                         mainSections.forEach(function(sec) {{
-                            sec.scrollTo(-10, -10);
+                            sec.scrollTo(-100, -100);
                         }});
 
                         // 3. 嘗試直接將最頂部的 root 元素拉到視線內
@@ -927,6 +927,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
