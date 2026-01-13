@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -50,11 +49,7 @@ class SustainabilityAssessment:
         if 'user_info' not in st.session_state: st.session_state.user_info = {}
         if 'temp_stakeholder_data' not in st.session_state: st.session_state.temp_stakeholder_data = {}
         if 'selected_materiality_keys' not in st.session_state: st.session_state.selected_materiality_keys = []
-        if 'step' not in st.session_state: st.session_state.step = 0 
-        # 新增下面這一行，用來產生唯一的 ID
-        if 'scroll_id' not in st.session_state: st.session_state.scroll_id = 0
-
-        
+            
         # 結果存儲
         if 'data_stakeholder' not in st.session_state: st.session_state.data_stakeholder = None
         if 'data_materiality' not in st.session_state: st.session_state.data_materiality = None
@@ -64,45 +59,6 @@ class SustainabilityAssessment:
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
-    def scroll_to_top(self):
-            # 利用 f-string 帶入 timestamp，確保每次換頁 HTML 內容都不同，強制瀏覽器重啟 JS
-            import time
-            ts = time.time()
-            
-            components.html(
-                f"""
-                <script>
-                    // Timestamp: {ts}
-                    function forceScroll() {{
-                        const win = window.parent;
-                        const doc = win.document;
-                        
-                        // 1. 強制最外層視窗歸零
-                        win.scrollTo(0, 0);
-                        
-                        // 2. 針對 Streamlit 內部的捲動容器 (section.main)
-                        const main = doc.querySelector('section.main');
-                        if (main) {{
-                            main.scrollTop = 0; 
-                        }}
-                        
-                        // 3. 嘗試對準物理錨點
-                        const anchor = doc.getElementById('top-marker');
-                        if (anchor) {{
-                            anchor.scrollIntoView({{behavior: 'instant', block: 'start'}});
-                        }}
-                    }}
-    
-                    // 解決處理順序問題：在內容渲染的不同階段連續執行多次
-                    setTimeout(forceScroll, 0);   // 立即執行
-                    setTimeout(forceScroll, 100); // 渲染中期
-                    setTimeout(forceScroll, 300); // 渲染後期
-                    setTimeout(forceScroll, 600); // 最終校準
-                </script>
-                """,
-                height=0
-            )
-    
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -921,24 +877,6 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-# --- 終極簡潔置頂方案開始 ---
-        import streamlit.components.v1 as components
-        # 只有當 step 變動時，這個 html 內容才會改變，進而觸發 JS
-        components.html(
-            f"""
-            <script>
-                // Step: {st.session_state.step}
-                var mainContainer = window.parent.document.querySelector('section.main');
-                if (mainContainer) {{
-                    mainContainer.scrollTo({{top: 0, behavior: 'auto'}});
-                }}
-                window.parent.window.scrollTo(0, 0);
-            </script>
-            """,
-            height=0
-        )
-        
-        # 3. 渲染頁面內容 (這部分會消耗時間渲染)
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -950,14 +888,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
-
-
-
-
-
-
 
 
 
