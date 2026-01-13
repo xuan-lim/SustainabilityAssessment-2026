@@ -578,14 +578,16 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.nav_timestamp = time.time()  # Add timestamp
+                    st.session_state.needs_scroll = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
-                st.session_state.nav_timestamp = time.time()  # Add timestamp
-                # Note: Make sure next_callback includes st.rerun() if it changes step
+            
+                # CRITICAL: Always set scroll flag and rerun
+                st.session_state.needs_scroll = True
+                st.rerun()  # Add this to ensure scroll happens
 
     # --- UI Pages ---
 
@@ -966,6 +968,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
