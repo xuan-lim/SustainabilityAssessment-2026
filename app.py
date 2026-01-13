@@ -61,28 +61,29 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # 修正：components.html 不支援 'key' 參數。
-            # 我們改為將 step 寫入 script 的註解中，這樣 HTML 內容變了，Streamlit 就會強制重跑 JS。
+            # 使用 f-string 確保每次 step 改變時，HTML 內容都會微幅變動進而重啟 JS
             components.html(
                 f"""
                 <script>
-                    // Current Step: {st.session_state.step} setTimeout(function() {{
-                        window.scrollTo(0, 0);
+                    // Step Tracking: {st.session_state.step}
+                    function forceScroll() {{
+                        const root = window.parent.document.getElementById('root');
+                        const main = window.parent.document.querySelector('section.main');
                         
-                        if (window.parent) {{
-                            window.parent.scrollTo(0, 0);
-                        }}
+                        // 1. 強制最外層視窗歸零
+                        window.parent.window.scrollTo(0, 0);
+                        
+                        // 2. 如果有 Streamlit 主要容器，強制它也歸零
+                        if (main) main.scrollTo(0, 0);
+                        
+                        // 3. 嘗試把 root 元素（網頁最起點）拉進視線
+                        if (root) root.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                    }}
     
-                        var mainContainer = window.parent.document.querySelector('section.main');
-                        if (mainContainer) {{
-                            mainContainer.scrollTo(0, 0);
-                        }}
-                        
-                        var topAnchor = window.parent.document.getElementById('top-marker');
-                        if (topAnchor) {{
-                            topAnchor.scrollIntoView({{behavior: "instant", block: "start"}});
-                        }}
-                    }}, 100);
+                    // 嘗試多次執行，防止被 Streamlit 的後續渲染蓋掉
+                    setTimeout(forceScroll, 10);
+                    setTimeout(forceScroll, 100);
+                    setTimeout(forceScroll, 300);
                 </script>
                 """,
                 height=0
@@ -906,24 +907,25 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-            # 1. Place an invisible marker at the absolute top of the page
-            st.markdown('<div id="top-marker" style="position:absolute; top:-50px;"></div>', unsafe_allow_html=True)
-            
-            # 2. Trigger the scroll function (which now has a unique key per step)
-            self.scroll_to_top()
-    
-            # 3. Render the specific step
-            if st.session_state.step == 0: self.render_language_selection()
-            elif st.session_state.step == 1: self.render_entry_portal()
-            elif st.session_state.step == 2: self.render_stakeholder()
-            elif st.session_state.step == 3: self.render_materiality()
-            elif st.session_state.step == 4: self.render_tcfd()
-            elif st.session_state.step == 5: self.render_hrdd()
-            elif st.session_state.step == 6: self.render_finish()
+# 在最上方插入一個完全透明但有 ID 的 div
+        st.markdown('<div id="top-anchor" style="opacity:0; height:0px;"></div>', unsafe_allow_html=True)
+        
+        # 呼叫捲動函式
+        self.scroll_to_top()
+        
+        # 頁面路由
+        if st.session_state.step == 0: self.render_language_selection()
+        elif st.session_state.step == 1: self.render_entry_portal()
+        elif st.session_state.step == 2: self.render_stakeholder()
+        elif st.session_state.step == 3: self.render_materiality()
+        elif st.session_state.step == 4: self.render_tcfd()
+        elif st.session_state.step == 5: self.render_hrdd()
+        elif st.session_state.step == 6: self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
