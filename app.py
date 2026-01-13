@@ -50,7 +50,11 @@ class SustainabilityAssessment:
         if 'user_info' not in st.session_state: st.session_state.user_info = {}
         if 'temp_stakeholder_data' not in st.session_state: st.session_state.temp_stakeholder_data = {}
         if 'selected_materiality_keys' not in st.session_state: st.session_state.selected_materiality_keys = []
-            
+        if 'step' not in st.session_state: st.session_state.step = 0 
+        # 新增下面這一行，用來產生唯一的 ID
+        if 'scroll_id' not in st.session_state: st.session_state.scroll_id = 0
+
+        
         # 結果存儲
         if 'data_stakeholder' not in st.session_state: st.session_state.data_stakeholder = None
         if 'data_materiality' not in st.session_state: st.session_state.data_materiality = None
@@ -917,11 +921,22 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 1. 將物理錨點放在最最前面
-        st.markdown('<div id="top-marker"></div>', unsafe_allow_html=True)
-        
-        # 2. 執行多段式捲動
-        self.scroll_to_top()
+# --- 終極簡潔置頂方案開始 ---
+        import streamlit.components.v1 as components
+        # 只有當 step 變動時，這個 html 內容才會改變，進而觸發 JS
+        components.html(
+            f"""
+            <script>
+                // Step: {st.session_state.step}
+                var mainContainer = window.parent.document.querySelector('section.main');
+                if (mainContainer) {{
+                    mainContainer.scrollTo({{top: 0, behavior: 'auto'}});
+                }}
+                window.parent.window.scrollTo(0, 0);
+            </script>
+            """,
+            height=0
+        )
         
         # 3. 渲染頁面內容 (這部分會消耗時間渲染)
         if st.session_state.step == 0: self.render_language_selection()
@@ -935,6 +950,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
