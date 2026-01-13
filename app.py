@@ -50,9 +50,7 @@ class SustainabilityAssessment:
         if 'user_info' not in st.session_state: st.session_state.user_info = {}
         if 'temp_stakeholder_data' not in st.session_state: st.session_state.temp_stakeholder_data = {}
         if 'selected_materiality_keys' not in st.session_state: st.session_state.selected_materiality_keys = []
-        if 'step' not in st.session_state: st.session_state.step = 0 
-        if 'trigger_scroll' not in st.session_state: st.session_state.trigger_scroll = False # 新增這行    
-        
+            
         # 結果存儲
         if 'data_stakeholder' not in st.session_state: st.session_state.data_stakeholder = None
         if 'data_materiality' not in st.session_state: st.session_state.data_materiality = None
@@ -63,32 +61,43 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # 只有當 trigger_scroll 為 True 時才執行
-            if st.session_state.get('trigger_scroll', False):
-                import time
-                ts = time.time()
-                components.html(
-                    f"""
-                    <script>
-                        // Unique: {ts}
-                        function doScroll() {{
-                            // 強制父視窗跳轉至錨點
-                            window.parent.location.hash = 'language-selection';
-                            window.parent.window.scrollTo(0, 0);
-                            
-                            const main = window.parent.document.querySelector('section.main');
-                            if (main) main.scrollTop = 0;
+            # 利用 f-string 帶入 timestamp，確保每次換頁 HTML 內容都不同，強制瀏覽器重啟 JS
+            import time
+            ts = time.time()
+            
+            components.html(
+                f"""
+                <script>
+                    // Timestamp: {ts}
+                    function forceScroll() {{
+                        const win = window.parent;
+                        const doc = win.document;
+                        
+                        // 1. 強制最外層視窗歸零
+                        win.scrollTo(0, 0);
+                        
+                        // 2. 針對 Streamlit 內部的捲動容器 (section.main)
+                        const main = doc.querySelector('section.main');
+                        if (main) {{
+                            main.scrollTop = 0; 
                         }}
-                        // 多次嘗試確保在長頁面載入後依然有效
-                        setTimeout(doScroll, 10);
-                        setTimeout(doScroll, 300);
-                        setTimeout(doScroll, 800);
-                    </script>
-                    """,
-                    height=0,
-                )
-                # 重要：捲動指令發出後，立刻設為 False，這樣填寫 TCFD 時就不會再捲動
-                st.session_state.trigger_scroll = False
+                        
+                        // 3. 嘗試對準物理錨點
+                        const anchor = doc.getElementById('top-marker');
+                        if (anchor) {{
+                            anchor.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
+                    }}
+    
+                    // 解決處理順序問題：在內容渲染的不同階段連續執行多次
+                    setTimeout(forceScroll, 0);   // 立即執行
+                    setTimeout(forceScroll, 100); // 渲染中期
+                    setTimeout(forceScroll, 300); // 渲染後期
+                    setTimeout(forceScroll, 600); // 最終校準
+                </script>
+                """,
+                height=0
+            )
     
     def setup_data(self):
         # =============================================================================================
@@ -527,22 +536,18 @@ class SustainabilityAssessment:
     
     # 導航按鈕
     def render_nav_buttons(self, next_label, next_callback, next_args=None, back_visible=True):
-            st.write("") 
-            c1, c2, c3, c4, c5 = st.columns([1, 0.5, 1, 0.5, 1])
-            with c1:
-                if back_visible:
-                    if st.button(self.get_ui("back_btn"), key=f"nav_back_{st.session_state.step}", type="secondary", use_container_width=True):
-                        st.session_state.step -= 1
-                        st.session_state.trigger_scroll = True # 換頁觸發捲動
-                        st.rerun()
-            with c5:
-                if st.button(next_label, key=f"nav_next_{st.session_state.step}", type="primary", use_container_width=True):
-                    st.session_state.trigger_scroll = True # 換頁觸發捲動
-                    if next_callback:
-                        next_callback(next_args) if next_args else next_callback()
-                    else:
-                        st.session_state.step += 1
-                        st.rerun()
+        st.write("") 
+        st.write("") 
+        c1, c2, c3, c4, c5 = st.columns([1, 0.5, 1, 0.5, 1])
+        with c1:
+            if back_visible:
+                if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
+                    st.session_state.step -= 1
+                    st.rerun()
+        with c5:
+            if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
+                if next_callback:
+                    next_callback(next_args) if next_args else next_callback()
 
     # --- UI Pages ---
 
@@ -912,10 +917,10 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 埋設錨點
-        st.markdown('<div id="language-selection"></div>', unsafe_allow_html=True)
+        # 1. 將物理錨點放在最最前面
+        st.markdown('<div id="top-marker"></div>', unsafe_allow_html=True)
         
-        # 執行捲動判斷
+        # 2. 執行多段式捲動
         self.scroll_to_top()
         
         # 3. 渲染頁面內容 (這部分會消耗時間渲染)
@@ -930,7 +935,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
 
 
 
