@@ -62,7 +62,7 @@ class SustainabilityAssessment:
             
     def scroll_to_top(self):
         # 增加 key=f"scroll_{st.session_state.step}" 強制每一頁都重新執行 JS
-        components.html(
+         components.html(
             f"""
             <script>
                 (function() {{
@@ -915,7 +915,7 @@ class SustainabilityAssessment:
         st.markdown('<div id="top-anchor" style="position:absolute; top:-100px; height:1px;"></div>', unsafe_allow_html=True)
         
         # 呼叫捲動 (現在它會隨 step 改變而重新執行)
-        self.scroll_to_top()
+         self.scroll_to_top()
         
         # 頁面路由
         if st.session_state.step == 0: self.render_language_selection()
@@ -928,7 +928,8 @@ class SustainabilityAssessment:
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
-    app.run()
+     app.run()
+
 
 
 
