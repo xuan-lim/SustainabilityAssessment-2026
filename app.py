@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -58,7 +59,16 @@ class SustainabilityAssessment:
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
-
+    def scroll_to_top(self):
+            # 透過 JavaScript 控制父層容器捲動至頂部
+            components.html(
+                """
+                <script>
+                    window.parent.document.querySelector('section.main').scrollTo(0, 0);
+                </script>
+                """,
+                height=0,
+            )
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -877,6 +887,8 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
+        self.scroll_to_top() # 新增這一行在 run 的最開頭
+        
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -888,6 +900,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
