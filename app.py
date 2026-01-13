@@ -692,59 +692,126 @@ class SustainabilityAssessment:
             self.render_nav_buttons(self.get_ui("next_btn"), go_next)
 
     # PAGE 4: TCFD Assessment
-    def render_tcfd(self):
-        st.title(self.get_ui("step4_title"))
-        results = []
-        lang = st.session_state.language
+def render_tcfd(self):
+    st.title(self.get_ui("step4_title"))
+    results = []
+    lang = st.session_state.language
+    
+    # Add introductory text or instructions
+    st.info(self.get_ui("tcfd_intro"))  # Add this to your UI text dictionary
+    st.write("")
+    
+    # 1. Opportunities Section (Top)
+    st.markdown(f"## 🌟 {self.get_ui('opp_header')}")
+    st.markdown("---")
+    
+    for idx, (key, info) in enumerate(self.tcfd_opp_data.items()):
+        display_text = info[lang]
+        def_text = info[f"def_{lang}"]
         
-        # 1. Opportunities (Top)
-        st.markdown(f"### {self.get_ui('opp_header')}")
-        st.markdown("---")
+        # Use container with custom styling for each item
+        with st.container():
+            # Use columns for better layout: icon/number + content
+            col_icon, col_content = st.columns([0.5, 9.5])
+            
+            with col_icon:
+                st.markdown(f"### {idx + 1}")
+            
+            with col_content:
+                st.markdown(f"**{display_text}**")
+                with st.expander("ℹ️ " + self.get_ui("definition_label")):
+                    st.write(def_text)
+                
+                # Sliders in columns
+                c1, c2 = st.columns(2)
+                with c1:
+                    sev = st.slider(
+                        self.get_ui("val_create_label"), 
+                        1, 5, 3, 
+                        key=f"tcfd_os_{key}",
+                        help=self.get_ui("val_create_help")  # Add help text
+                    )
+                with c2:
+                    like = st.slider(
+                        self.get_ui("like_label"), 
+                        1, 5, 3, 
+                        key=f"tcfd_ol_{key}",
+                        help=self.get_ui("like_help")  # Add help text
+                    )
+                
+                results.append({
+                    "Type": "Opportunity", 
+                    "Topic": info["en"], 
+                    "Severity/Value": sev, 
+                    "Likelihood": like
+                })
+            
+            # Visual separator between items
+            st.markdown("<div style='margin: 20px 0; border-bottom: 1px solid #e0e0e0;'></div>", 
+                       unsafe_allow_html=True)
+    
+    st.write("")
+    st.write("")
+    
+    # 2. Risks Section (Bottom)
+    st.markdown(f"## ⚠️ {self.get_ui('risk_header')}")
+    st.markdown("---")
+    
+    for idx, (key, info) in enumerate(self.tcfd_risk_data.items()):
+        display_text = info[lang]
+        def_text = info[f"def_{lang}"]
         
-        for key, info in self.tcfd_opp_data.items():
-            display_text = info[lang]
-            def_text = info[f"def_{lang}"]
+        # Use container with custom styling
+        with st.container():
+            col_icon, col_content = st.columns([0.5, 9.5])
             
-            # TCFD：每一個議題都有定義 [?]
-            st.markdown(f"**{display_text}**", help=def_text)
+            with col_icon:
+                st.markdown(f"### {idx + 1}")
             
-            c1, c2 = st.columns(2)
-            with c1:
-                sev = st.slider(self.get_ui("val_create_label"), 1, 5, 3, key=f"tcfd_os_{key}")
-            with c2:
-                like = st.slider(self.get_ui("like_label"), 1, 5, 3, key=f"tcfd_ol_{key}")
+            with col_content:
+                st.markdown(f"**{display_text}**")
+                with st.expander("ℹ️ " + self.get_ui("definition_label")):
+                    st.write(def_text)
+                
+                c1, c2 = st.columns(2)
+                with c1:
+                    sev = st.slider(
+                        self.get_ui("sev_label"), 
+                        1, 5, 3, 
+                        key=f"tcfd_rs_{key}",
+                        help=self.get_ui("sev_help")
+                    )
+                with c2:
+                    like = st.slider(
+                        self.get_ui("like_label"), 
+                        1, 5, 3, 
+                        key=f"tcfd_rl_{key}",
+                        help=self.get_ui("like_help")
+                    )
+                
+                results.append({
+                    "Type": "Risk", 
+                    "Topic": info["en"], 
+                    "Severity/Value": sev, 
+                    "Likelihood": like
+                })
             
-            results.append({"Type": "Opportunity", "Topic": info["en"], "Severity/Value": sev, "Likelihood": like})
-            st.write("")
-
-        st.write("")
-        st.write("")
-
-        # 2. Risks (Bottom)
-        st.markdown(f"### {self.get_ui('risk_header')}")
-        st.markdown("---")
-        
-        for key, info in self.tcfd_risk_data.items():
-            display_text = info[lang]
-            def_text = info[f"def_{lang}"]
-            
-            st.markdown(f"**{display_text}**", help=def_text)
-            
-            c1, c2 = st.columns(2)
-            with c1:
-                sev = st.slider(self.get_ui("sev_label"), 1, 5, 3, key=f"tcfd_rs_{key}")
-            with c2:
-                like = st.slider(self.get_ui("like_label"), 1, 5, 3, key=f"tcfd_rl_{key}")
-            
-            results.append({"Type": "Risk", "Topic": info["en"], "Severity/Value": sev, "Likelihood": like})
-            st.write("")
-
-        def go_next():
-            st.session_state.data_tcfd = pd.DataFrame(results)
-            st.session_state.step = 5
-            st.rerun()
-
-        self.render_nav_buttons(self.get_ui("next_btn"), go_next)
+            # Visual separator
+            st.markdown("<div style='margin: 20px 0; border-bottom: 1px solid #e0e0e0;'></div>", 
+                       unsafe_allow_html=True)
+    
+    st.write("")
+    
+    # Progress indicator
+    total_items = len(self.tcfd_opp_data) + len(self.tcfd_risk_data)
+    st.progress(1.0, text=f"✅ {total_items}/{total_items} items assessed")
+    
+    def go_next():
+        st.session_state.data_tcfd = pd.DataFrame(results)
+        st.session_state.step = 5
+        st.rerun()
+    
+    self.render_nav_buttons(self.get_ui("next_btn"), go_next)
 
     # PAGE 5: HRDD
     def render_hrdd(self):
@@ -888,6 +955,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
