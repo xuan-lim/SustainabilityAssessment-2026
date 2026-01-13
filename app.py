@@ -33,31 +33,6 @@ st.markdown("""
     div[data-baseweb="tooltip"] {
         width: 300px;
         white-space: pre-wrap;
-        
-    /* Floating Go to Top Button */
-        .topBtn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 999;
-            background-color: #f0f2f6;
-            border: 1px solid #d6d6d6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: #31333F;
-            font-weight: bold;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    }
-    .topBtn:hover {
-        background-color: #FF8C00;
-        color: white;
-    }
-        
     }
     </style>
     """, unsafe_allow_html=True)
@@ -902,23 +877,17 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-            with st.sidebar:
-                if st.button("⬆️ Back to Top", use_container_width=True):
-                    st.rerun() # Rerunning the script naturally resets the scroll position to the top
-                
-            # Existing navigation logic
-            if st.session_state.step == 0: self.render_language_selection()
-            elif st.session_state.step == 1: self.render_entry_portal()
-            elif st.session_state.step == 2: self.render_stakeholder()
-            elif st.session_state.step == 3: self.render_materiality()
-            elif st.session_state.step == 4: self.render_tcfd()
-            elif st.session_state.step == 5: self.render_hrdd()
-            elif st.session_state.step == 6: self.render_finish()
+        if st.session_state.step == 0: self.render_language_selection()
+        elif st.session_state.step == 1: self.render_entry_portal()
+        elif st.session_state.step == 2: self.render_stakeholder()
+        elif st.session_state.step == 3: self.render_materiality()
+        elif st.session_state.step == 4: self.render_tcfd()
+        elif st.session_state.step == 5: self.render_hrdd()
+        elif st.session_state.step == 6: self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
 
 
 
