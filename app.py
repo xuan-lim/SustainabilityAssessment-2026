@@ -877,18 +877,6 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-# Force the window to scroll to (0,0) on every script execution
-        st.components.v1.html(
-            """
-            <script>
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
-            </script>
-            """,
-            height=0,
-        )
-
-        if st.session_state.step == 0: self.render_language_selection()
-        
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
