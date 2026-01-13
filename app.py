@@ -877,33 +877,34 @@ class SustainabilityAssessment:
                 st.session_state.clear()
                 st.rerun()
 
-def run(self):
-        # 1. Force scroll to top using JavaScript. 
-        # Since 'key' is not supported in st.components.v1.html, we just place it here.
-        components.html(
-            """
-            <script>
-                var mainSection = window.parent.document.querySelector('section.main');
-                if (mainSection) {
-                    mainSection.scrollTo({ top: 0, behavior: 'instant' });
-                }
-            </script>
-            """,
-            height=0
-        )
-
-        # 2. Your existing page routing logic
-        if st.session_state.step == 0: self.render_language_selection()
-        elif st.session_state.step == 1: self.render_entry_portal()
-        elif st.session_state.step == 2: self.render_stakeholder()
-        elif st.session_state.step == 3: self.render_materiality()
-        elif st.session_state.step == 4: self.render_tcfd()
-        elif st.session_state.step == 5: self.render_hrdd()
-        elif st.session_state.step == 6: self.render_finish()
+    def run(self):
+            # 1. Force scroll to top using JavaScript. 
+            # Since 'key' is not supported in st.components.v1.html, we just place it here.
+            components.html(
+                """
+                <script>
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {
+                        mainSection.scrollTo({ top: 0, behavior: 'instant' });
+                    }
+                </script>
+                """,
+                height=0
+            )
+    
+            # 2. Your existing page routing logic
+            if st.session_state.step == 0: self.render_language_selection()
+            elif st.session_state.step == 1: self.render_entry_portal()
+            elif st.session_state.step == 2: self.render_stakeholder()
+            elif st.session_state.step == 3: self.render_materiality()
+            elif st.session_state.step == 4: self.render_tcfd()
+            elif st.session_state.step == 5: self.render_hrdd()
+            elif st.session_state.step == 6: self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
