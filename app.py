@@ -504,6 +504,33 @@ class SustainabilityAssessment:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
                     st.rerun()
+
+        with c3:
+                    # 「回到頂部」按鈕：使用 HTML 錨點跳轉，最穩定
+                    # 我們利用 CSS 把按鈕做成像 Streamlit 的樣式
+                    st.markdown(
+                        f"""
+                        <a href="#top-marker" target="_self" style="text-decoration: none;">
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 0.4rem 0.75rem;
+                                border-radius: 0.5rem;
+                                border: 1px solid #d6d6d6;
+                                background-color: white;
+                                color: #31333F;
+                                cursor: pointer;
+                                font-size: 14px;
+                                height: 38px;
+                            ">
+                                ⬆️ 回頂部
+                            </div>
+                        </a>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+        
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
                 if next_callback:
@@ -877,6 +904,9 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
+        # 在這裡放一個隱形的標記
+        st.markdown('<div id="top-marker"></div>', unsafe_allow_html=True)
+        
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -888,6 +918,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
