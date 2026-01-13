@@ -1,26 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import streamlit.components.v1 as components
-import time
-
-# At the very top of your main app, before any content
-st.markdown('<span id="top"></span>', unsafe_allow_html=True)
-    components.html("""
-    <script>
-    function scroll() {
-        try {
-            window.parent.location.href = '#top';
-            const main = window.parent.document.querySelector('section.main');
-            if (main) main.scrollTop = 0;
-            window.parent.scrollTo(0, 0);
-        } catch(e) {}
-    }
-    scroll();
-    setTimeout(scroll, 50);
-    setTimeout(scroll, 100);
-    </script>
-    """, height=0)
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -523,16 +503,11 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.needs_scroll = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
-            
-                # CRITICAL: Always set scroll flag and rerun
-                st.session_state.needs_scroll = True
-                st.rerun()  # Add this to ensure scroll happens
 
     # --- UI Pages ---
 
@@ -913,10 +888,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
-
-
 
 
 
