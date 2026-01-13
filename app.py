@@ -56,36 +56,48 @@ class SustainabilityAssessment:
         if 'data_materiality' not in st.session_state: st.session_state.data_materiality = None
         if 'data_tcfd' not in st.session_state: st.session_state.data_tcfd = {}
         if 'data_hrdd' not in st.session_state: st.session_state.data_hrdd = {}
-        if 'trigger_scroll' not in st.session_state: st.session_state.trigger_scroll = False
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # 關鍵：只有當旗標為 True 時才執行捲動代碼
-            if st.session_state.get('trigger_scroll', False):
-                import time
-                ts = time.time()
-                
-                components.html(
-                    f"""
-                    <script>
-                        // Timestamp: {ts}
-                        function forceScroll() {{
-                            const win = window.parent;
-                            win.scrollTo(0, 0);
-                            const main = win.document.querySelector('section.main');
-                            if (main) main.scrollTop = 0;
+            # 利用 f-string 帶入 timestamp，確保每次換頁 HTML 內容都不同，強制瀏覽器重啟 JS
+            import time
+            ts = time.time()
+            
+            components.html(
+                f"""
+                <script>
+                    // Timestamp: {ts}
+                    function forceScroll() {{
+                        const win = window.parent;
+                        const doc = win.document;
+                        
+                        // 1. 強制最外層視窗歸零
+                        win.scrollTo(0, 0);
+                        
+                        // 2. 針對 Streamlit 內部的捲動容器 (section.main)
+                        const main = doc.querySelector('section.main');
+                        if (main) {{
+                            main.scrollTop = 0; 
                         }}
-                        setTimeout(forceScroll, 0);
-                        setTimeout(forceScroll, 100);
-                        setTimeout(forceScroll, 400);
-                    </script>
-                    """,
-                    height=0
-                )
-                # 捲動指令送出後，立刻重置旗標
-                st.session_state.trigger_scroll = False
+                        
+                        // 3. 嘗試對準物理錨點
+                        const anchor = doc.getElementById('top-marker');
+                        if (anchor) {{
+                            anchor.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
+                    }}
+    
+                    // 解決處理順序問題：在內容渲染的不同階段連續執行多次
+                    setTimeout(forceScroll, 0);   // 立即執行
+                    setTimeout(forceScroll, 100); // 渲染中期
+                    setTimeout(forceScroll, 300); // 渲染後期
+                    setTimeout(forceScroll, 600); // 最終校準
+                </script>
+                """,
+                height=0
+            )
     
     def setup_data(self):
         # =============================================================================================
@@ -531,7 +543,6 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.trigger_scroll = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
@@ -661,7 +672,6 @@ class SustainabilityAssessment:
             with c1:
                 if st.button(self.get_ui("back_btn"), type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.trigger_scroll = True
                     st.rerun()
             with c5:
                 if st.button(self.get_ui("confirm_sel"), type="primary", use_container_width=True):
@@ -925,7 +935,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
 
 
 
