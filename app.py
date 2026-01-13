@@ -495,46 +495,59 @@ class SustainabilityAssessment:
     def get_ui(self, key): return self.ui_texts[st.session_state.language][key]
     
     # 導航按鈕
-    def render_nav_buttons(self, next_label, next_callback, next_args=None, back_visible=True):
+def render_nav_buttons(self, next_label, next_callback, next_args=None, back_visible=True):
         st.write("") 
         st.write("") 
-        c1, c2, c3, c4, c5 = st.columns([1, 0.5, 1, 0.5, 1])
+        c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
+        
         with c1:
             if back_visible:
-                if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
+                if st.button(self.get_ui("back_btn"), key=f"back_{st.session_state.step}", use_container_width=True):
                     st.session_state.step -= 1
+                    # 返回時也想回頂部，可以在這裡比照辦理
                     st.rerun()
-
-        with c3:
-                    # 「回到頂部」按鈕：使用 HTML 錨點跳轉，最穩定
-                    # 我們利用 CSS 把按鈕做成像 Streamlit 的樣式
-                    st.markdown(
-                        f"""
-                        <a href="#top-marker" target="_self" style="text-decoration: none;">
-                            <div style="
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                padding: 0.4rem 0.75rem;
-                                border-radius: 0.5rem;
-                                border: 1px solid #d6d6d6;
-                                background-color: white;
-                                color: #31333F;
-                                cursor: pointer;
-                                font-size: 14px;
-                                height: 38px;
-                            ">
-                                ⬆️ 回頂部
-                            </div>
-                        </a>
-                        """, 
-                        unsafe_allow_html=True
-                    )
         
+        with c3:
+            # 手動回頂部按鈕 (保留供使用者隨時使用)
+            st.markdown(
+                f"""
+                <a href="#top-marker" target="_self" style="text-decoration: none;">
+                    <div style="display: flex; align-items: center; justify-content: center; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid #d6d6d6; background-color: white; color: #31333F; cursor: pointer; font-size: 14px; height: 38px;">
+                        ⬆️ 回頂部
+                    </div>
+                </a>
+                """, 
+                unsafe_allow_html=True
+            )
+
         with c5:
-            if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
+            # 修改處：當按下 Next Step 時
+            if st.button(next_label, key=f"next_{st.session_state.step}", type="primary", use_container_width=True):
+                # 1. 執行原本的換頁邏輯
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
+                else:
+                    st.session_state.step += 1
+                
+                # 2. 關鍵：在這裡設定一個臨時旗標
+                st.session_state.do_scroll = True
+                st.rerun()
+
+        # --- 這裡就是「自動點擊」回頂部的邏輯 ---
+        if st.session_state.get("do_scroll", False):
+            import streamlit.components.v1 as components
+            components.html(
+                """
+                <script>
+                    window.parent.window.scrollTo(0, 0);
+                    var main = window.parent.document.querySelector('section.main');
+                    if (main) main.scrollTop = 0;
+                </script>
+                """,
+                height=0
+            )
+            # 執行完畢立刻關閉，避免填答時跳動
+            st.session_state.do_scroll = False
 
     # --- UI Pages ---
 
@@ -918,6 +931,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
