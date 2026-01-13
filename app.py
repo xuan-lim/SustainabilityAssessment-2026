@@ -2,53 +2,80 @@ import streamlit as st
 import pandas as pd
 import io
 import streamlit.components.v1 as components
+import time
 
-# Check if we need to scroll to top after navigation
-if st.session_state.get('scroll_to_top', False):
-    components.html("""
+# Put this BEFORE any st.title, st.header, or other content
+if 'nav_timestamp' in st.session_state:
+    components.html(f"""
     <script>
-    (function() {
-        function forceScrollTop() {
-            try {
-                // Scroll parent window
-                if (window.parent) {
-                    window.parent.scrollTo(0, 0);
-                }
-                
-                // Scroll Streamlit containers
-                const selectors = [
-                    'section.main',
-                    '[data-testid="stAppViewContainer"]',
-                    'section[tabindex="-1"]'
-                ];
-                
-                selectors.forEach(selector => {
-                    const el = window.parent.document.querySelector(selector);
-                    if (el) {
-                        el.scrollTop = 0;
-                        el.scrollTo(0, 0);
-                    }
-                });
-                
-                // Scroll document
-                if (window.parent.document) {
-                    window.parent.document.documentElement.scrollTop = 0;
-                    window.parent.document.body.scrollTop = 0;
-                }
-            } catch(e) {}
-        }
+        // Use timestamp to ensure fresh execution: {st.session_state.nav_timestamp}
         
-        // Execute multiple times to ensure it works
-        forceScrollTop();
-        setTimeout(forceScrollTop, 10);
-        setTimeout(forceScrollTop, 50);
-        setTimeout(forceScrollTop, 100);
-    })();
+        (function scrollNow() {{
+            function doScroll() {{
+                try {{
+                    // Method 1: Direct parent scroll
+                    if (window.parent) {{
+                        window.parent.scroll(0, 0);
+                        window.parent.scrollTo({{top: 0, left: 0, behavior: 'instant'}});
+                    }}
+                    
+                    // Method 2: Find all scrollable Streamlit elements
+                    const doc = window.parent.document;
+                    if (doc) {{
+                        // Scroll document itself
+                        doc.documentElement.scrollTop = 0;
+                        doc.body.scrollTop = 0;
+                        
+                        // Scroll main content areas
+                        const selectors = [
+                            'section.main',
+                            '[data-testid="stAppViewContainer"]',
+                            '[data-testid="stApp"]',
+                            'section[tabindex="-1"]',
+                            '.main .block-container'
+                        ];
+                        
+                        selectors.forEach(function(sel) {{
+                            const elements = doc.querySelectorAll(sel);
+                            elements.forEach(function(el) {{
+                                if (el) {{
+                                    el.scrollTop = 0;
+                                    el.scrollTo({{top: 0, left: 0, behavior: 'instant'}});
+                                }}
+                            }});
+                        }});
+                    }}
+                }} catch(e) {{
+                    console.log('Scroll error:', e);
+                }}
+            }}
+            
+            // Execute immediately
+            doScroll();
+            
+            // Execute on DOM ready
+            if (document.readyState === 'loading') {{
+                document.addEventListener('DOMContentLoaded', doScroll);
+            }}
+            
+            // Execute multiple times with delays to catch late renders
+            setTimeout(doScroll, 0);
+            setTimeout(doScroll, 10);
+            setTimeout(doScroll, 50);
+            setTimeout(doScroll, 100);
+            setTimeout(doScroll, 200);
+            
+            // Use requestAnimationFrame for next render
+            requestAnimationFrame(doScroll);
+            requestAnimationFrame(function() {{
+                setTimeout(doScroll, 0);
+            }});
+        }})();
     </script>
     """, height=0)
     
-    # Clear the flag after scrolling
-    st.session_state.scroll_to_top = False
+    # Remove the timestamp after use
+    del st.session_state.nav_timestamp
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -551,13 +578,14 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.scroll_to_top = True  # Add this flag
+                    st.session_state.nav_timestamp = time.time()  # Add timestamp
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
-                st.session_state.scroll_to_top = True  # Add this flag
+                st.session_state.nav_timestamp = time.time()  # Add timestamp
+                # Note: Make sure next_callback includes st.rerun() if it changes step
 
     # --- UI Pages ---
 
@@ -938,6 +966,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
