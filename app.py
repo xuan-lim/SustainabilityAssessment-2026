@@ -928,7 +928,8 @@ class SustainabilityAssessment:
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
-     app.run()
+    app.run()
+
 
 
 
