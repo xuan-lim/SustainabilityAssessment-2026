@@ -60,14 +60,22 @@ class SustainabilityAssessment:
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
     def scroll_to_top(self):
-            # 透過 JavaScript 控制父層容器捲動至頂部
-            components.html(
-                """
-                <script>
-                    window.parent.document.querySelector('section.main').scrollTo(0, 0);
-                </script>
-                """,
-                height=0,
+            # 強化版：加入 10ms 延遲並強制針對 main container 與 window 同時作用
+        components.html(
+            """
+            <script>
+                setTimeout(function() {
+                    // 1. 針對 Streamlit 的主要內容區域
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {
+                        mainSection.scrollTo({ top: 0, behavior: 'instant' });
+                    }
+                    // 2. 針對整個瀏覽器視窗 (防禦性)
+                    window.parent.window.scrollTo({ top: 0, behavior: 'instant' });
+                }, 10); // 延遲 10 毫秒確保 DOM 已更新
+            </script>
+            """,
+            height=0,
             )
     def setup_data(self):
         # =============================================================================================
@@ -900,6 +908,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
