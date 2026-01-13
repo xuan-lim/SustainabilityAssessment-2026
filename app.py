@@ -61,20 +61,32 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-        components.html(
-                    f"""
-                    <script>
-                        setTimeout(function() {{
-                            window.scrollTo(0, 0);
-                            if (window.parent) {{ window.parent.scrollTo(0, 0); }}
-                            var mainContainer = window.parent.document.querySelector('section.main');
-                            if (mainContainer) {{ mainContainer.scrollTo(0, 0); }}
-                        }}, 100);
-                    </script>
-                    """,
-                    height=0,
-                    key=f"scroll_to_top_{st.session_state.step}"
-                )
+            # 修正：components.html 不支援 'key' 參數。
+            # 我們改為將 step 寫入 script 的註解中，這樣 HTML 內容變了，Streamlit 就會強制重跑 JS。
+            components.html(
+                f"""
+                <script>
+                    // Current Step: {st.session_state.step} setTimeout(function() {{
+                        window.scrollTo(0, 0);
+                        
+                        if (window.parent) {{
+                            window.parent.scrollTo(0, 0);
+                        }}
+    
+                        var mainContainer = window.parent.document.querySelector('section.main');
+                        if (mainContainer) {{
+                            mainContainer.scrollTo(0, 0);
+                        }}
+                        
+                        var topAnchor = window.parent.document.getElementById('top-marker');
+                        if (topAnchor) {{
+                            topAnchor.scrollIntoView({{behavior: "instant", block: "start"}});
+                        }}
+                    }}, 100);
+                </script>
+                """,
+                height=0
+            )
     
     def setup_data(self):
         # =============================================================================================
@@ -912,6 +924,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
