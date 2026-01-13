@@ -884,11 +884,11 @@ elif st.session_state.step == 3: self.render_materiality()
 elif st.session_state.step == 4: self.render_tcfd()
 elif st.session_state.step == 5: self.render_hrdd()
 elif st.session_state.step == 6: self.render_finish()
-]
             
 if __name__ == "__main__":
 app = SustainabilityAssessment()
 app.run()
+
 
 
 
