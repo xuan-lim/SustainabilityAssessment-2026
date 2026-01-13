@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import streamlit.components.v1 as components
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -59,40 +58,7 @@ class SustainabilityAssessment:
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
-            
-    def scroll_to_top(self):
-        # 增加 key=f"scroll_{st.session_state.step}" 強制每一頁都重新執行 JS
-         components.html(
-            f"""
-            <script>
-                (function() {{
-                    const targetHash = 'top-anchor';
-                    // 先清空 hash 再設定，確保每次都會觸發跳轉
-                    window.parent.location.hash = ''; 
-                    window.parent.location.hash = targetHash;
 
-                    setTimeout(function() {{
-                        // 1. 強制視窗歸零
-                        window.parent.window.scrollTo(0, 0);
-                        
-                        // 2. 強制 Streamlit 主要容器歸零
-                        var mainSections = window.parent.document.querySelectorAll('section.main');
-                        mainSections.forEach(function(sec) {{
-                            sec.scrollTo(0, 0);
-                        }});
-                        
-                        // 3. 確保物理錨點被對齊
-                        var element = window.parent.document.getElementById(targetHash);
-                        if (element) {{
-                            element.scrollIntoView({{behavior: 'instant', block: 'start'}});
-                        }}
-                    }}, 100); // 稍微增加到 100ms，確保長頁面已渲染
-                }})();
-            </script>
-            """,
-            height=0,
-            key=f"scroll_trigger_{st.session_state.step}" # 關鍵：強制換頁重啟
-        )
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -911,13 +877,6 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 必須確保 ID 存在。使用一個隱形的 div 作為頂部標記
-        st.markdown('<div id="top-anchor" style="position:absolute; top:-100px; height:1px;"></div>', unsafe_allow_html=True)
-        
-        # 呼叫捲動 (現在它會隨 step 改變而重新執行)
-        self.scroll_to_top()
-        
-        # 頁面路由
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -929,19 +888,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
