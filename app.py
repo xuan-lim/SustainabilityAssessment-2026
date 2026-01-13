@@ -59,24 +59,19 @@ class SustainabilityAssessment:
         
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
-    def scroll_to_top(self):
-            # 強化版：加入 10ms 延遲並強制針對 main container 與 window 同時作用
+    def scroll_to_anchor(self):
         components.html(
             """
             <script>
-                setTimeout(function() {
-                    // 1. 針對 Streamlit 的主要內容區域
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    if (mainSection) {
-                        mainSection.scrollTo({ top: 0, behavior: 'instant' });
-                    }
-                    // 2. 針對整個瀏覽器視窗 (防禦性)
-                    window.parent.window.scrollTo({ top: 0, behavior: 'instant' });
-                }, 10); // 延遲 10 毫秒確保 DOM 已更新
+                // 尋找我們埋下的錨點並強制捲動過去
+                var element = window.parent.document.getElementById('top_anchor');
+                if (element) {
+                    element.scrollIntoView({behavior: 'instant', block: 'start'});
+                }
             </script>
             """,
             height=0,
-            )
+        )
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -895,7 +890,11 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        self.scroll_to_top() # 新增這一行在 run 的最開頭
+        # 在頁面最頂端埋設一個 ID 為 top_anchor 的隱形錨點
+        st.markdown("<div id='top_anchor'></div>", unsafe_allow_html=True)
+        
+        # 觸發跳轉至該錨點
+        self.scroll_to_anchor()
         
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
@@ -908,6 +907,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
