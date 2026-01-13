@@ -59,17 +59,6 @@ class SustainabilityAssessment:
         # 狀態標記
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
-    # Scroll to top function
-    def scroll_to_top(self):
-        st.components.v1.html(
-            """
-            <script>
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
-            </script>
-            """,
-            height=0
-        )
-    
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -514,11 +503,9 @@ class SustainabilityAssessment:
             if back_visible:
                 if st.button(self.get_ui("back_btn"), key="nav_back", type="secondary", use_container_width=True):
                     st.session_state.step -= 1
-                    st.session_state.scroll_top = True
                     st.rerun()
         with c5:
             if st.button(next_label, key="nav_next", type="primary", use_container_width=True):
-                st.session_state.scroll_top = True
                 if next_callback:
                     next_callback(next_args) if next_args else next_callback()
 
@@ -890,6 +877,18 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
+# Force the window to scroll to (0,0) on every script execution
+        st.components.v1.html(
+            """
+            <script>
+                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+            </script>
+            """,
+            height=0,
+        )
+
+        if st.session_state.step == 0: self.render_language_selection()
+        
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
