@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import streamlit.components.v1 as components  # <--- ADD THIS
 
 # 設定頁面配置
 st.set_page_config(page_title="Sustainability Assessment Tool", layout="wide")
@@ -877,17 +878,33 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        if st.session_state.step == 0: self.render_language_selection()
-        elif st.session_state.step == 1: self.render_entry_portal()
-        elif st.session_state.step == 2: self.render_stakeholder()
-        elif st.session_state.step == 3: self.render_materiality()
-        elif st.session_state.step == 4: self.render_tcfd()
-        elif st.session_state.step == 5: self.render_hrdd()
-        elif st.session_state.step == 6: self.render_finish()
+        # This snippet forces the browser to scroll to the top 
+        # whenever the 'step' number changes.
+            components.html(
+                f"""
+                <script>
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {{
+                        mainSection.scrollTo({{ top: 0, behavior: 'instant' }});
+                    }}
+                </script>
+                """,
+                height=0,
+                key=f"scroll_anchor_{st.session_state.step}" # Key ensures it runs every step change
+        )
+
+            if st.session_state.step == 0: self.render_language_selection()
+            elif st.session_state.step == 1: self.render_entry_portal()
+            elif st.session_state.step == 2: self.render_stakeholder()
+            elif st.session_state.step == 3: self.render_materiality()
+            elif st.session_state.step == 4: self.render_tcfd()
+            elif st.session_state.step == 5: self.render_hrdd()
+            elif st.session_state.step == 6: self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
