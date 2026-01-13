@@ -697,8 +697,8 @@ def render_tcfd(self):
     results = []
     lang = st.session_state.language
     
-    # Add introductory text or instructions
-    st.info(self.get_ui("tcfd_intro"))  # Add this to your UI text dictionary
+    # Add introductory text (optional - remove if you don't have this UI text)
+    # st.info(self.get_ui("tcfd_intro"))
     st.write("")
     
     # 1. Opportunities Section (Top)
@@ -719,7 +719,8 @@ def render_tcfd(self):
             
             with col_content:
                 st.markdown(f"**{display_text}**")
-                with st.expander("ℹ️ " + self.get_ui("definition_label")):
+                # Show definition in expander instead of help tooltip
+                with st.expander("ℹ️ Definition"):
                     st.write(def_text)
                 
                 # Sliders in columns
@@ -728,15 +729,13 @@ def render_tcfd(self):
                     sev = st.slider(
                         self.get_ui("val_create_label"), 
                         1, 5, 3, 
-                        key=f"tcfd_os_{key}",
-                        help=self.get_ui("val_create_help")  # Add help text
+                        key=f"tcfd_os_{key}"
                     )
                 with c2:
                     like = st.slider(
                         self.get_ui("like_label"), 
                         1, 5, 3, 
-                        key=f"tcfd_ol_{key}",
-                        help=self.get_ui("like_help")  # Add help text
+                        key=f"tcfd_ol_{key}"
                     )
                 
                 results.append({
@@ -747,8 +746,7 @@ def render_tcfd(self):
                 })
             
             # Visual separator between items
-            st.markdown("<div style='margin: 20px 0; border-bottom: 1px solid #e0e0e0;'></div>", 
-                       unsafe_allow_html=True)
+            st.markdown("---")
     
     st.write("")
     st.write("")
@@ -770,7 +768,8 @@ def render_tcfd(self):
             
             with col_content:
                 st.markdown(f"**{display_text}**")
-                with st.expander("ℹ️ " + self.get_ui("definition_label")):
+                # Show definition in expander
+                with st.expander("ℹ️ Definition"):
                     st.write(def_text)
                 
                 c1, c2 = st.columns(2)
@@ -778,15 +777,13 @@ def render_tcfd(self):
                     sev = st.slider(
                         self.get_ui("sev_label"), 
                         1, 5, 3, 
-                        key=f"tcfd_rs_{key}",
-                        help=self.get_ui("sev_help")
+                        key=f"tcfd_rs_{key}"
                     )
                 with c2:
                     like = st.slider(
                         self.get_ui("like_label"), 
                         1, 5, 3, 
-                        key=f"tcfd_rl_{key}",
-                        help=self.get_ui("like_help")
+                        key=f"tcfd_rl_{key}"
                     )
                 
                 results.append({
@@ -797,14 +794,9 @@ def render_tcfd(self):
                 })
             
             # Visual separator
-            st.markdown("<div style='margin: 20px 0; border-bottom: 1px solid #e0e0e0;'></div>", 
-                       unsafe_allow_html=True)
+            st.markdown("---")
     
     st.write("")
-    
-    # Progress indicator
-    total_items = len(self.tcfd_opp_data) + len(self.tcfd_risk_data)
-    st.progress(1.0, text=f"✅ {total_items}/{total_items} items assessed")
     
     def go_next():
         st.session_state.data_tcfd = pd.DataFrame(results)
@@ -955,6 +947,7 @@ def render_tcfd(self):
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
