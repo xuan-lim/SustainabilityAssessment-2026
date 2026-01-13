@@ -61,37 +61,38 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
             
     def scroll_to_top(self):
-# 強化版：結合 Hash 跳轉、延遲執行與多重捲動重置
+        # 增加 key=f"scroll_{st.session_state.step}" 強制每一頁都重新執行 JS
         components.html(
             f"""
             <script>
                 (function() {{
-                    // 1. 強制讓父視窗網址加上錨點，誘發瀏覽器原生跳轉
-                    window.parent.location.hash = 'top'; 
-                    window.parent.location.hash = 'language-selection';
+                    const targetHash = 'top-anchor';
+                    // 先清空 hash 再設定，確保每次都會觸發跳轉
+                    window.parent.location.hash = ''; 
+                    window.parent.location.hash = targetHash;
 
-                    // 2. 使用延遲，確保在 Streamlit 渲染完畢後才執行捲動
                     setTimeout(function() {{
-                        // 強制父視窗物理歸零
-                        window.parent.window.scrollTo(-100, -100);
+                        // 1. 強制視窗歸零
+                        window.parent.window.scrollTo(0, 0);
                         
-                        // 針對 Streamlit 內部的主要捲動區塊強制歸零
+                        // 2. 強制 Streamlit 主要容器歸零
                         var mainSections = window.parent.document.querySelectorAll('section.main');
                         mainSections.forEach(function(sec) {{
-                            sec.scrollTo(-100, -100);
+                            sec.scrollTo(0, 0);
                         }});
-
-                        // 3. 嘗試直接將最頂部的 root 元素拉到視線內
-                        var root = window.parent.document.getElementById('root');
-                        if (root) {{
-                            root.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        
+                        // 3. 確保物理錨點被對齊
+                        var element = window.parent.document.getElementById(targetHash);
+                        if (element) {{
+                            element.scrollIntoView({{behavior: 'instant', block: 'start'}});
                         }}
-                    }}, 50); // 延遲 50 毫秒效果最穩定
+                    }}, 100); // 稍微增加到 100ms，確保長頁面已渲染
                 }})();
             </script>
             """,
             height=0,
-            )
+            key=f"scroll_trigger_{st.session_state.step}" # 關鍵：強制換頁重啟
+        )
     def setup_data(self):
         # =============================================================================================
         # 1. 介面文字 (UI Labels)
@@ -910,12 +911,13 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 在整個頁面最頂端（甚至在 Toolbar 下方一點點）埋設 ID
-        st.markdown('<div id="language-selection" style="position:absolute; top:-100px;"></div>', unsafe_allow_html=True)
+        # 必須確保 ID 存在。使用一個隱形的 div 作為頂部標記
+        st.markdown('<div id="top-anchor" style="position:absolute; top:-100px; height:1px;"></div>', unsafe_allow_html=True)
         
-        # 執行強化版回頂部函式
+        # 呼叫捲動 (現在它會隨 step 改變而重新執行)
         self.scroll_to_top()
         
+        # 頁面路由
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
@@ -927,6 +929,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
