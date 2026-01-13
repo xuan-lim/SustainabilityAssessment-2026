@@ -692,116 +692,116 @@ class SustainabilityAssessment:
             self.render_nav_buttons(self.get_ui("next_btn"), go_next)
 
     # PAGE 4: TCFD Assessment
-def render_tcfd(self):
-    st.title(self.get_ui("step4_title"))
-    results = []
-    lang = st.session_state.language
-    
-    # Add introductory text (optional - remove if you don't have this UI text)
-    # st.info(self.get_ui("tcfd_intro"))
-    st.write("")
-    
-    # 1. Opportunities Section (Top)
-    st.markdown(f"## 🌟 {self.get_ui('opp_header')}")
-    st.markdown("---")
-    
-    for idx, (key, info) in enumerate(self.tcfd_opp_data.items()):
-        display_text = info[lang]
-        def_text = info[f"def_{lang}"]
+    def render_tcfd(self):
+        st.title(self.get_ui("step4_title"))
+        results = []
+        lang = st.session_state.language
         
-        # Use container with custom styling for each item
-        with st.container():
-            # Use columns for better layout: icon/number + content
-            col_icon, col_content = st.columns([0.5, 9.5])
-            
-            with col_icon:
-                st.markdown(f"### {idx + 1}")
-            
-            with col_content:
-                st.markdown(f"**{display_text}**")
-                # Show definition in expander instead of help tooltip
-                with st.expander("ℹ️ Definition"):
-                    st.write(def_text)
-                
-                # Sliders in columns
-                c1, c2 = st.columns(2)
-                with c1:
-                    sev = st.slider(
-                        self.get_ui("val_create_label"), 
-                        1, 5, 3, 
-                        key=f"tcfd_os_{key}"
-                    )
-                with c2:
-                    like = st.slider(
-                        self.get_ui("like_label"), 
-                        1, 5, 3, 
-                        key=f"tcfd_ol_{key}"
-                    )
-                
-                results.append({
-                    "Type": "Opportunity", 
-                    "Topic": info["en"], 
-                    "Severity/Value": sev, 
-                    "Likelihood": like
-                })
-            
-            # Visual separator between items
-            st.markdown("---")
-    
-    st.write("")
-    st.write("")
-    
-    # 2. Risks Section (Bottom)
-    st.markdown(f"## ⚠️ {self.get_ui('risk_header')}")
-    st.markdown("---")
-    
-    for idx, (key, info) in enumerate(self.tcfd_risk_data.items()):
-        display_text = info[lang]
-        def_text = info[f"def_{lang}"]
+        # Add introductory text (optional - remove if you don't have this UI text)
+        # st.info(self.get_ui("tcfd_intro"))
+        st.write("")
         
-        # Use container with custom styling
-        with st.container():
-            col_icon, col_content = st.columns([0.5, 9.5])
+        # 1. Opportunities Section (Top)
+        st.markdown(f"## 🌟 {self.get_ui('opp_header')}")
+        st.markdown("---")
+        
+        for idx, (key, info) in enumerate(self.tcfd_opp_data.items()):
+            display_text = info[lang]
+            def_text = info[f"def_{lang}"]
             
-            with col_icon:
-                st.markdown(f"### {idx + 1}")
-            
-            with col_content:
-                st.markdown(f"**{display_text}**")
-                # Show definition in expander
-                with st.expander("ℹ️ Definition"):
-                    st.write(def_text)
+            # Use container with custom styling for each item
+            with st.container():
+                # Use columns for better layout: icon/number + content
+                col_icon, col_content = st.columns([0.5, 9.5])
                 
-                c1, c2 = st.columns(2)
-                with c1:
-                    sev = st.slider(
-                        self.get_ui("sev_label"), 
-                        1, 5, 3, 
-                        key=f"tcfd_rs_{key}"
-                    )
-                with c2:
-                    like = st.slider(
-                        self.get_ui("like_label"), 
-                        1, 5, 3, 
-                        key=f"tcfd_rl_{key}"
-                    )
+                with col_icon:
+                    st.markdown(f"### {idx + 1}")
                 
-                results.append({
-                    "Type": "Risk", 
-                    "Topic": info["en"], 
-                    "Severity/Value": sev, 
-                    "Likelihood": like
-                })
+                with col_content:
+                    st.markdown(f"**{display_text}**")
+                    # Show definition in expander instead of help tooltip
+                    with st.expander("ℹ️ Definition"):
+                        st.write(def_text)
+                    
+                    # Sliders in columns
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        sev = st.slider(
+                            self.get_ui("val_create_label"), 
+                            1, 5, 3, 
+                            key=f"tcfd_os_{key}"
+                        )
+                    with c2:
+                        like = st.slider(
+                            self.get_ui("like_label"), 
+                            1, 5, 3, 
+                            key=f"tcfd_ol_{key}"
+                        )
+                    
+                    results.append({
+                        "Type": "Opportunity", 
+                        "Topic": info["en"], 
+                        "Severity/Value": sev, 
+                        "Likelihood": like
+                    })
+                
+                # Visual separator between items
+                st.markdown("---")
+        
+        st.write("")
+        st.write("")
+        
+        # 2. Risks Section (Bottom)
+        st.markdown(f"## ⚠️ {self.get_ui('risk_header')}")
+        st.markdown("---")
+        
+        for idx, (key, info) in enumerate(self.tcfd_risk_data.items()):
+            display_text = info[lang]
+            def_text = info[f"def_{lang}"]
             
-            # Visual separator
-            st.markdown("---")
-    
-    st.write("")
-    
-    def go_next():
-        st.session_state.data_tcfd = pd.DataFrame(results)
-        st.session_state.step = 5
-        st.rerun()
+            # Use container with custom styling
+            with st.container():
+                col_icon, col_content = st.columns([0.5, 9.5])
+                
+                with col_icon:
+                    st.markdown(f"### {idx + 1}")
+                
+                with col_content:
+                    st.markdown(f"**{display_text}**")
+                    # Show definition in expander
+                    with st.expander("ℹ️ Definition"):
+                        st.write(def_text)
+                    
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        sev = st.slider(
+                            self.get_ui("sev_label"), 
+                            1, 5, 3, 
+                            key=f"tcfd_rs_{key}"
+                        )
+                    with c2:
+                        like = st.slider(
+                            self.get_ui("like_label"), 
+                            1, 5, 3, 
+                            key=f"tcfd_rl_{key}"
+                        )
+                    
+                    results.append({
+                        "Type": "Risk", 
+                        "Topic": info["en"], 
+                        "Severity/Value": sev, 
+                        "Likelihood": like
+                    })
+                
+                # Visual separator
+                st.markdown("---")
+        
+        st.write("")
+        
+        def go_next():
+            st.session_state.data_tcfd = pd.DataFrame(results)
+            st.session_state.step = 5
+            st.rerun()
     
     self.render_nav_buttons(self.get_ui("next_btn"), go_next)
 
@@ -947,6 +947,7 @@ def render_tcfd(self):
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
