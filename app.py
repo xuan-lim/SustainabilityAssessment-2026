@@ -902,17 +902,10 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-            # 1. Create an invisible anchor at the very top
-            st.markdown("<div id='top'></div>", unsafe_allow_html=True)
-    
-            # 2. Render the floating button using HTML
-            # The href='#top' will jump the browser to the anchor defined above
-            st.markdown("""
-                <a class="topBtn" href="#top" title="Go to top">
-                    ▲
-                </a>
-                """, unsafe_allow_html=True)
-    
+            with st.sidebar:
+                if st.button("⬆️ Back to Top", use_container_width=True):
+                    st.rerun() # Rerunning the script naturally resets the scroll position to the top
+                
             # Existing navigation logic
             if st.session_state.step == 0: self.render_language_selection()
             elif st.session_state.step == 1: self.render_entry_portal()
@@ -925,6 +918,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
