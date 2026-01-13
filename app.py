@@ -61,29 +61,31 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # 使用 f-string 確保每次 step 改變時，HTML 內容都會微幅變動進而重啟 JS
+            # 透過 f-string 讓每一頁的 HTML 內容都唯一，強制重啟
             components.html(
                 f"""
                 <script>
-                    // Step Tracking: {st.session_state.step}
-                    function forceScroll() {{
-                        const root = window.parent.document.getElementById('root');
-                        const main = window.parent.document.querySelector('section.main');
+                    // Unique ID: {st.session_state.step}_{pd.Timestamp.now().microsecond}
+                    function extremeScroll() {{
+                        const win = window.parent;
+                        const doc = win.document;
                         
-                        // 1. 強制最外層視窗歸零
-                        window.parent.window.scrollTo(0, 0);
-                        
-                        // 2. 如果有 Streamlit 主要容器，強制它也歸零
-                        if (main) main.scrollTo(0, 0);
-                        
-                        // 3. 嘗試把 root 元素（網頁最起點）拉進視線
-                        if (root) root.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        // 1. 強制重置所有可能的捲動容器
+                        win.scrollTo(0, 0);
+                        const main = doc.querySelector('section.main');
+                        if (main) {{
+                            main.scrollTop = 0; // 直接操作 scrollTop 屬性比 scrollTo 更暴力有效
+                        }}
+    
+                        // 2. 尋找物理錨點並強制對齊
+                        const anchor = doc.getElementById('absolute-top');
+                        if (anchor) {{
+                            anchor.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
                     }}
     
-                    // 嘗試多次執行，防止被 Streamlit 的後續渲染蓋掉
-                    setTimeout(forceScroll, 10);
-                    setTimeout(forceScroll, 100);
-                    setTimeout(forceScroll, 300);
+                    // 關鍵：在短時間內連續執行 5 次，對抗 Streamlit 的延遲渲染
+                    [0, 50, 150, 300, 500].forEach(t => setTimeout(extremeScroll, t));
                 </script>
                 """,
                 height=0
@@ -907,24 +909,25 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-# 在最上方插入一個完全透明但有 ID 的 div
-        st.markdown('<div id="top-anchor" style="opacity:0; height:0px;"></div>', unsafe_allow_html=True)
+# 埋設一個實體標籤在最前面，並給它一個獨一無二的 ID
+        st.markdown('<div id="absolute-top" style="position:fixed; top:0; left:0; width:1px; height:1px; opacity:0; pointer-events:none;"></div>', unsafe_allow_html=True)
         
-        # 呼叫捲動函式
+        # 執行捲動函式
         self.scroll_to_top()
         
-        # 頁面路由
+        # 這裡根據 step 渲染頁面
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
         elif st.session_state.step == 2: self.render_stakeholder()
         elif st.session_state.step == 3: self.render_materiality()
         elif st.session_state.step == 4: self.render_tcfd()
         elif st.session_state.step == 5: self.render_hrdd()
-        elif st.session_state.step == 6: self.render_finish()
+        elif st.session_state.step == 6: self.render_finish()render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
