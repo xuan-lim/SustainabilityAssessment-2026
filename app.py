@@ -61,32 +61,20 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
             
     def scroll_to_top(self):
-        # 強化版：直接修改父層網址的 hash 並強制執行捲動
         components.html(
-            f"""
-            <script>
-                (function() {{
-                    // 1. 強制修改父層網址為 #language-selection
-                    window.parent.location.hash = 'language-selection';
-                    
-                    // 2. 針對某些瀏覽器，額外執行一次 scrollTo
-                    setTimeout(function() {{
+                    """
+                    <script>
+                        // 強制瀏覽器最外層視窗（包含 Streamlit 的 Toolbar）回到頂部
                         window.parent.window.scrollTo(0, 0);
-                        var mainSection = window.parent.document.querySelector('section.main');
-                        if (mainSection) {{
-                            mainSection.scrollTo(0, 0);
-                        }}
                         
-                        // 3. 尋找剛剛埋下的 div 並確保它在視線最上方
-                        var element = window.parent.document.getElementById('language-selection');
-                        if (element) {{
-                            element.scrollIntoView({{behavior: 'instant', block: 'start'}});
-                        }}
-                    }}, 10);
-                }})();
-            </script>
-            """,
-            height=0,
+                        // 雙重保險：針對內容捲動區也執行一次
+                        var mainContent = window.parent.document.querySelector('section.main');
+                        if (mainContent) {
+                            mainContent.scrollTo(0, 0);
+                        }
+                    </script>
+                    """,
+                    height=0,
             )
     def setup_data(self):
         # =============================================================================================
@@ -906,10 +894,7 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 1. 在頁面最頂端埋下錨點 (對應您想要的 #language-selection)
-        st.markdown('<div id="language-selection"></div>', unsafe_allow_html=True)
-        
-        # 2. 執行強制捲動
+        # 執行強制捲動
         self.scroll_to_top()
         
         if st.session_state.step == 0: self.render_language_selection()
@@ -923,6 +908,7 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
