@@ -887,17 +887,54 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        if st.session_state.step == 0: self.render_language_selection()
-        elif st.session_state.step == 1: self.render_entry_portal()
-        elif st.session_state.step == 2: self.render_stakeholder()
-        elif st.session_state.step == 3: self.render_materiality()
-        elif st.session_state.step == 4: self.render_tcfd()
-        elif st.session_state.step == 5: self.render_hrdd()
-        elif st.session_state.step == 6: self.render_finish()
+    # CRITICAL: Place scroll logic HERE, before rendering any page
+    if st.session_state.get('needs_scroll', False):
+        st.markdown('<span id="top"></span>', unsafe_allow_html=True)
+        components.html("""
+        <script>
+        function scroll() {
+            try {
+                window.parent.location.href = '#top';
+                const main = window.parent.document.querySelector('section.main');
+                if (main) {
+                    main.scrollTop = 0;
+                    main.scrollTo(0, 0);
+                }
+                window.parent.scrollTo(0, 0);
+                window.parent.document.documentElement.scrollTop = 0;
+            } catch(e) {
+                console.log('Scroll error:', e);
+            }
+        }
+        scroll();
+        setTimeout(scroll, 1);
+        setTimeout(scroll, 50);
+        setTimeout(scroll, 100);
+        setTimeout(scroll, 200);
+        </script>
+        """, height=0)
+        st.session_state.needs_scroll = False
+    
+    # Now render the appropriate page
+    if st.session_state.step == 0: 
+        self.render_language_selection()
+    elif st.session_state.step == 1: 
+        self.render_entry_portal()
+    elif st.session_state.step == 2: 
+        self.render_stakeholder()
+    elif st.session_state.step == 3: 
+        self.render_materiality()
+    elif st.session_state.step == 4: 
+        self.render_tcfd()
+    elif st.session_state.step == 5: 
+        self.render_hrdd()
+    elif st.session_state.step == 6: 
+        self.render_finish()
 
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
+
 
 
 
