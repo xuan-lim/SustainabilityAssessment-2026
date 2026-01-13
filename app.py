@@ -61,29 +61,43 @@ class SustainabilityAssessment:
         if 'just_finished' not in st.session_state: st.session_state.just_finished = False
 
     def scroll_to_top(self):
-            # 檢查是否剛換頁
-            if "last_step" not in st.session_state:
-                st.session_state.last_step = st.session_state.step
-    
-            # 只有當目前的 step 跟紀錄的 last_step 不一樣時，才觸發捲動
-            if st.session_state.step != st.session_state.last_step:
-                import time
-                ts = time.time()
-                components.html(
-                    f"""
-                    <script>
-                        function forceScroll() {{
-                            window.parent.window.scrollTo(0, 0);
-                            const main = window.parent.document.querySelector('section.main');
-                            if (main) main.scrollTop = 0;
+            # 利用 f-string 帶入 timestamp，確保每次換頁 HTML 內容都不同，強制瀏覽器重啟 JS
+            import time
+            ts = time.time()
+            
+            components.html(
+                f"""
+                <script>
+                    // Timestamp: {ts}
+                    function forceScroll() {{
+                        const win = window.parent;
+                        const doc = win.document;
+                        
+                        // 1. 強制最外層視窗歸零
+                        win.scrollTo(0, 0);
+                        
+                        // 2. 針對 Streamlit 內部的捲動容器 (section.main)
+                        const main = doc.querySelector('section.main');
+                        if (main) {{
+                            main.scrollTop = 0; 
                         }}
-                        [0, 100, 300, 600].forEach(t => setTimeout(forceScroll, t));
-                    </script>
-                    """,
-                    height=0,
-                )
-                # 捲動完後，更新 last_step 避免重複觸發
-                st.session_state.last_step = st.session_state.step
+                        
+                        // 3. 嘗試對準物理錨點
+                        const anchor = doc.getElementById('top-marker');
+                        if (anchor) {{
+                            anchor.scrollIntoView({{behavior: 'instant', block: 'start'}});
+                        }}
+                    }}
+    
+                    // 解決處理順序問題：在內容渲染的不同階段連續執行多次
+                    setTimeout(forceScroll, 0);   // 立即執行
+                    setTimeout(forceScroll, 100); // 渲染中期
+                    setTimeout(forceScroll, 300); // 渲染後期
+                    setTimeout(forceScroll, 600); // 最終校準
+                </script>
+                """,
+                height=0
+            )
     
     def setup_data(self):
         # =============================================================================================
@@ -903,12 +917,12 @@ class SustainabilityAssessment:
                 st.rerun()
 
     def run(self):
-        # 1. 埋設錨點
+        # 1. 將物理錨點放在最最前面
         st.markdown('<div id="top-marker"></div>', unsafe_allow_html=True)
         
-        # 2. 呼叫帶有判斷邏輯的捲動函式
+        # 2. 執行多段式捲動
         self.scroll_to_top()
-                
+        
         # 3. 渲染頁面內容 (這部分會消耗時間渲染)
         if st.session_state.step == 0: self.render_language_selection()
         elif st.session_state.step == 1: self.render_entry_portal()
@@ -921,8 +935,6 @@ class SustainabilityAssessment:
 if __name__ == "__main__":
     app = SustainabilityAssessment()
     app.run()
-
-
 
 
 
